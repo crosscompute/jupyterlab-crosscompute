@@ -5,7 +5,7 @@ import {
 import {
   JupyterFrontEnd, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
+import { ICommandPalette } from '@jupyterlab/apputils'; 
 import {
   ToolbarButton
 } from '@jupyterlab/apputils';
@@ -25,7 +25,8 @@ import {
 const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: 'my-extension-name:buttonPlugin',
-  autoStart: true
+  autoStart: true,
+  requires: [ICommandPalette]
 };
 
 
@@ -59,8 +60,19 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
 /**
  * Activate the extension.
  */
-function activate(app: JupyterFrontEnd) {
+function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
   app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
+  app.commands.addCommand('console', {
+    label: 'Console.log.test',
+    execute: () => {
+      console.log('test');
+    }
+  });
+
+  palette.addItem({
+    command: 'console',
+    category: 'CrossCompute'
+  });
 };
 
 

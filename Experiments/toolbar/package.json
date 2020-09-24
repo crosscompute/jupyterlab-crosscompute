@@ -37,7 +37,9 @@
     "@jupyterlab/apputils": "^2.2.5",
     "@jupyterlab/docregistry": "^2.2.3",
     "@jupyterlab/notebook": "^2.2.6",
-    "@lumino/disposable": "^1.4.3"
+    "@lumino/disposable": "^1.4.3",
+    "puppeteer": "^5.3.1",
+    "puppeteer-core": "^5.3.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.25.0",
