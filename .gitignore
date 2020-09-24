@@ -1,0 +1,12 @@
+# node
+build
+coverage
+node_modules
+# vim
+*.sw[op]
+# log
+*.log
+# configuration
+.env*
+# system
+.DS_Store
