@@ -1,3 +1,26 @@
-.jp-CrossCompute-icon {
+.jp-crosscompute-icon {
   background-image: url(crosscompute-logo.svg);
+}
+
+.jp-run-icon {
+  background-image: url(run.svg);
+}
+
+.jp-crosscompute-toolbar-run-item {
+  background: 'red',
+}
+
+
+.jp-crosscompute-browser {
+  background-color: var(--jp-layout-color1);
+  height: 100%;
+}
+
+.jp-crosscompute-browser .jp-FileBrowser {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.jp-GitHubBrowser .jp-ToolbarButton.jp-Toolbar-item.jp-crosscompute-toolbar-item {
+  display: block;
 }
