@@ -68,13 +68,14 @@ class DownloadButton
             console.log('download');
             const zipUrl =
               'https://storage.googleapis.com/crosscompute-20200929/example-20200929.zip';
-            window.open(zipUrl);
+            window.location.href = zipUrl;
           })
           .catch(error => console.log('error', error));
       }
     });
-
-    panel.toolbar.insertItem(0, 'CrossCompute Download', button);
+    const toolbarItemLength = panel.toolbar;
+    console.log('toolbarItemLength', toolbarItemLength);
+    panel.toolbar.insertItem(10, 'CrossCompute Download', button);
     return new DisposableDelegate(() => {
       button.dispose();
     });
