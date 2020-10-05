@@ -2,10 +2,11 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ToolbarButton } from '@jupyterlab/apputils';
+import { ToolbarButton, Spinner } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+import { Widget } from '@lumino/widgets';
 
 import { requestAPI } from './notebook-download-button';
 
@@ -58,16 +59,27 @@ class DownloadButton
       onClick: () => {
         this._app.commands
           .execute(CommandIDs.download, { path: '' })
+          .then(() => {
+            console.log('creating spinner');
+            const spinner = new Spinner();
+            Widget.attach(spinner, document.body);
+            return spinner;
+          })
           .then(
-            () =>
+            spinner =>
               new Promise(resolve => {
-                setTimeout(resolve, 5000);
+                setTimeout(() => {
+                  console.log('closing spinner');
+                  spinner.close();
+                  resolve();
+                }, 3000);
               })
           )
           .then(() => {
             console.log('download');
             const zipUrl =
               'https://storage.googleapis.com/crosscompute-20200929/example-20200929.zip';
+            console.log(zipUrl);
             window.location.href = zipUrl;
           })
           .catch(error => console.log('error', error));
