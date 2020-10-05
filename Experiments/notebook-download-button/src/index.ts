@@ -2,7 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ToolbarButton, Spinner } from '@jupyterlab/apputils';
+import { ToolbarButton, Spinner, InputDialog } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
@@ -38,7 +38,17 @@ function activate(app: JupyterFrontEnd): void {
         });
     }
   });
-  app.docRegistry.addWidgetExtension('Notebook', new DownloadButton(app));
+  const downloadButton = new DownloadButton(app);
+  app.restored.then(() => {
+    InputDialog.getText({ title: ' CrossCompute token' })
+      .then((result: any) => {
+        console.log(result.value);
+        downloadButton.setToken = result.value;
+        console.log('updated token');
+      })
+      .catch(() => console.log('error'));
+  });
+  app.docRegistry.addWidgetExtension('Notebook', downloadButton);
 }
 
 class DownloadButton
@@ -61,6 +71,7 @@ class DownloadButton
           .execute(CommandIDs.download, { path: '' })
           .then(() => {
             console.log('creating spinner');
+            console.log('token', this._token);
             const spinner = new Spinner();
             Widget.attach(spinner, document.body);
             return spinner;
@@ -93,7 +104,12 @@ class DownloadButton
     });
   }
 
+  public set setToken(newToken: string) {
+    this._token = newToken;
+  }
+
   private _app: JupyterFrontEnd;
+  private _token = '';
 }
 
 export default extension;
