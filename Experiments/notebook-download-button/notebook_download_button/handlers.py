@@ -12,7 +12,7 @@ class RouteHandler(APIHandler):
     def get(self):
         google_zip_file_uri = 'https://storage.googleapis.com/crosscompute-20200929/example-20200929.zip'
         self.finish(json.dumps({
-            "data": "success"
+            "url": google_zip_file_uri
         }))
 
 

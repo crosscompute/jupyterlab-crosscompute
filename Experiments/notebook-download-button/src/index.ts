@@ -2,13 +2,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ToolbarButton, Spinner, InputDialog } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-import { Widget } from '@lumino/widgets';
-
+import { IStateDB } from '@jupyterlab/statedb';
+import { InputDialog, ICommandPalette } from '@jupyterlab/apputils';
+import { IMainMenu } from '@jupyterlab/mainmenu';
+import { Menu } from '@lumino/widgets';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { requestAPI } from './notebook-download-button';
+import DownloadButton from './DownloadButton';
 
 /**
  * Initialization data for the notebook-download-button extension.
@@ -16,100 +16,69 @@ import { requestAPI } from './notebook-download-button';
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'notebook-download-button',
   autoStart: true,
+  requires: [ICommandPalette, IMainMenu, IStateDB],
   activate: activate
 };
 
-namespace CommandIDs {
-  export const download = 'crosscompute:download';
-}
+export const CommandIDs = {
+  getDownloadUrl: 'crosscompute:getDownloadUrl',
+  resetToken: 'crosscompute:resetToken',
+  downloadFile: 'crosscompute:downloadFile'
+};
 
-function activate(app: JupyterFrontEnd): void {
+function activate(
+  app: JupyterFrontEnd,
+  palette: ICommandPalette,
+  mainMenu: IMainMenu,
+  state: IStateDB
+): void {
   console.log('JupyterLab extension notebook-download-button is activated!');
-  app.commands.addCommand(CommandIDs.download, {
-    label: 'CrossCompute Download',
+  const plugInId = 'CrossCompute';
+  app.commands.addCommand(CommandIDs.getDownloadUrl, {
+    label: 'CrossCompute Download Url',
     execute: (args: any) => {
-      console.log('crosscompute:download');
-      requestAPI<any>('download')
-        .then(data => {
-          console.log('successfully downloaded');
-        })
-        .catch(reason => {
-          console.error('error: not able to download');
-        });
+      return requestAPI<any>('download');
     }
   });
-  const downloadButton = new DownloadButton(app);
-  app.restored.then(() => {
-    InputDialog.getText({ title: ' CrossCompute token' })
-      .then((result: any) => {
-        console.log(result.value);
-        downloadButton.setToken = result.value;
-        console.log('updated token');
-      })
-      .catch(() => console.log('error'));
-  });
-  app.docRegistry.addWidgetExtension('Notebook', downloadButton);
-}
 
-class DownloadButton
-  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
-  /**
-   * Create a new extension object.
-   */
-  constructor(app: JupyterFrontEnd) {
-    this._app = app;
-  }
-  createNew(
-    panel: NotebookPanel,
-    context: DocumentRegistry.IContext<INotebookModel>
-  ): IDisposable {
-    const button = new ToolbarButton({
-      iconClass: 'jp-crosscompute-icon',
-      tooltip: 'CrossCompute Download',
-      onClick: () => {
-        this._app.commands
-          .execute(CommandIDs.download, { path: '' })
-          .then(() => {
-            console.log('creating spinner');
-            console.log('token', this._token);
-            const spinner = new Spinner();
-            Widget.attach(spinner, document.body);
-            return spinner;
-          })
-          .then(
-            spinner =>
-              new Promise(resolve => {
-                setTimeout(() => {
-                  console.log('closing spinner');
-                  spinner.close();
-                  resolve();
-                }, 3000);
-              })
-          )
-          .then(() => {
-            console.log('download');
-            const zipUrl =
-              'https://storage.googleapis.com/crosscompute-20200929/example-20200929.zip';
-            console.log(zipUrl);
-            window.location.href = zipUrl;
-          })
-          .catch(error => console.log('error', error));
+  app.commands.addCommand(CommandIDs.resetToken, {
+    label: 'CrossCompute Reset Token',
+    execute: (args: any) => {
+      InputDialog.getText({ title: ' CrossCompute Token' })
+        .then((result: any) => {
+          if (!result.value) {
+            return;
+          }
+          downloadButton.setToken = result.value;
+          state.save(plugInId, { token: result.value });
+          console.log('updated token', result.value);
+        })
+        .catch(() => console.log('error'));
+    }
+  });
+
+  const downloadButton = new DownloadButton(app);
+  app.restored
+    .then(() => state.fetch(plugInId))
+    .then(state => {
+      console.log(state);
+      if (state) {
+        const stateJson = state as ReadonlyJSONObject;
+        console.log('state', stateJson);
+        if (stateJson) {
+          downloadButton.setToken = stateJson.token as string;
+          return;
+        }
+        app.commands.execute(CommandIDs.resetToken);
       }
     });
-    const toolbarItemLength = panel.toolbar;
-    console.log('toolbarItemLength', toolbarItemLength);
-    panel.toolbar.insertItem(10, 'CrossCompute Download', button);
-    return new DisposableDelegate(() => {
-      button.dispose();
-    });
-  }
+  app.docRegistry.addWidgetExtension('Notebook', downloadButton);
 
-  public set setToken(newToken: string) {
-    this._token = newToken;
-  }
+  const CrossComputeMenu: Menu = new Menu({ commands: app.commands });
+  CrossComputeMenu.title.label = 'CrossCompute';
+  mainMenu.addMenu(CrossComputeMenu, { rank: 80 });
 
-  private _app: JupyterFrontEnd;
-  private _token = '';
+  CrossComputeMenu.addItem({ command: CommandIDs.resetToken });
 }
 
 export default extension;
