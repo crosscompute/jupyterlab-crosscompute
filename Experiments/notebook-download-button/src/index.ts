@@ -42,7 +42,7 @@ function activate(
   });
 
   app.commands.addCommand(CommandIDs.resetToken, {
-    label: 'CrossCompute Reset Token',
+    label: 'Reset Token',
     execute: (args: any) => {
       InputDialog.getText({ title: ' CrossCompute Token' })
         .then((result: any) => {

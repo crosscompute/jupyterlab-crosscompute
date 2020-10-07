@@ -14,6 +14,7 @@ class DownloadButton
   constructor(app: JupyterFrontEnd) {
     this._app = app;
   }
+
   createNew(
     panel: NotebookPanel,
     context: DocumentRegistry.IContext<INotebookModel>
@@ -22,6 +23,7 @@ class DownloadButton
       iconClass: 'jp-crosscompute-icon',
       tooltip: 'CrossCompute Download',
       onClick: (): void => {
+        button.setHidden(true);
         this._app.commands
           .execute(CommandIDs.getDownloadUrl, { path: '' })
           .then(data => {
@@ -42,8 +44,12 @@ class DownloadButton
           .then(url => {
             console.log('download url', url);
             window.location.href = url as string;
+            button.setHidden(false);
           })
-          .catch(error => console.log('error', error));
+          .catch(error => {
+            console.log('error', error);
+            button.setHidden(false);
+          });
       }
     });
     const toolbarItemLength = panel.toolbar;
