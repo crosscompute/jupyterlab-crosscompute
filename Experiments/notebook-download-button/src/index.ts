@@ -38,7 +38,7 @@ function activate(
     label: 'CrossCompute Download Url',
     execute: (args: any) => {
       console.log('args', args);
-      return requestAPI<any>(`download?path=${args.path}`);
+      return requestAPI<any>(`download/${args.path}`);
     }
   });
 
