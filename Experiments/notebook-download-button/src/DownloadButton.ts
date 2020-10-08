@@ -23,10 +23,14 @@ class DownloadButton
       iconClass: 'jp-crosscompute-icon',
       tooltip: 'CrossCompute Download',
       onClick: (): void => {
+        console.log('----------', panel, context);
+        (window as any).panel = panel;
+        (window as any).context = context;
         button.setHidden(true);
         this._app.commands
-          .execute(CommandIDs.getDownloadUrl, { path: '' })
+          .execute(CommandIDs.getDownloadUrl, { path: context.path })
           .then(data => {
+            console.log('data ------', data);
             console.log('token', this._token);
             const spinner = new Spinner();
             Widget.attach(spinner, document.body);
@@ -43,7 +47,7 @@ class DownloadButton
           )
           .then(url => {
             console.log('download url', url);
-            window.location.href = url as string;
+            // window.location.href = url as string;
             button.setHidden(false);
           })
           .catch(error => {

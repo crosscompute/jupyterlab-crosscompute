@@ -37,7 +37,8 @@ function activate(
   app.commands.addCommand(CommandIDs.getDownloadUrl, {
     label: 'CrossCompute Download Url',
     execute: (args: any) => {
-      return requestAPI<any>('download');
+      console.log('args', args);
+      return requestAPI<any>(`download?path=${args.path}`);
     }
   });
 
