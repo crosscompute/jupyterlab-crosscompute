@@ -1,1 +1,1 @@
-# crosscompute-jupyterlab-extensions
+# CrossCompute Extensions for JupyterLab
