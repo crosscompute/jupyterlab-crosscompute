@@ -2,11 +2,11 @@
 build
 coverage
 node_modules
-# vim
-*.sw[op]
 # log
 *.log
 # configuration
 .env*
+# vim
+*.sw[op]
 # system
 .DS_Store
