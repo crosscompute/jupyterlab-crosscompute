@@ -1,6 +1,3 @@
-"""
-Setup Module to setup Python Handlers for the crosscompute-jupyterlab-extensions extension.
-"""
 import os
 
 from jupyter_packaging import (
@@ -12,7 +9,7 @@ import setuptools
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 # The name of the project
-name="crosscompute_jupyterlab_extensions"
+name = 'crosscompute_jupyterlab_extensions'
 
 # Ensure a valid python version
 ensure_python(">=3.5")
@@ -39,10 +36,10 @@ data_files_spec = [
      "jupyter-config", "crosscompute_jupyterlab_extensions.json"),
 ]
 
-cmdclass = create_cmdclass("jsdeps", 
+cmdclass = create_cmdclass(
+    'jsdeps',
     package_data_spec=package_data_spec,
-    data_files_spec=data_files_spec
-)
+    data_files_spec=data_files_spec)
 
 cmdclass["jsdeps"] = combine_commands(
     install_npm(HERE, build_cmd="build:all", npm=["jlpm"]),
@@ -58,9 +55,9 @@ setup_args = dict(
     url="https://github.com/crosscompute/crosscompute-jupyterlab-extensions",
     author="CrossCompute Inc.",
     description="CrossCompute Extensions for JupyterLab",
-    long_description= long_description,
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    cmdclass= cmdclass,
+    cmdclass=cmdclass,
     packages=setuptools.find_packages(),
     install_requires=[
         "jupyterlab~=2.0",
