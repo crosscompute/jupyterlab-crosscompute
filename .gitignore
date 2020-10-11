@@ -1,7 +1,14 @@
 # node
-build
-coverage
 node_modules
+# python
+*.egg*
+*.py[co]
+.coverage
+.pytest_cache
+__pycache__
+build/
+dist/
+.tox
 # log
 *.log
 # configuration
