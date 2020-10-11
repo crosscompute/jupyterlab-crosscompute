@@ -15,11 +15,11 @@
   "author": "CrossCompute Inc.",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "styles/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
+  "style": "styles/index.css",
   "repository": {
     "type": "git",
     "url": "https://github.com/crosscompute/crosscompute-jupyterlab-extensions.git"
@@ -57,7 +57,7 @@
     "typescript": "~3.7.0"
   },
   "sideEffects": [
-    "style/*.css"
+    "styles/*.css"
   ],
   "jupyterlab": { 
     "discovery": {

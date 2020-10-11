@@ -2,23 +2,37 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
-
-// import { requestAPI } from './crosscompute-jupyterlab-extensions';
+import { ICommandPalette } from '@jupyterlab/apputils';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'crosscompute-jupyterlab-extensions',
   autoStart: true,
+  requires: [ICommandPalette],
   activate,
 };
 
-function activate(
-  app: JupyterFrontEnd,
-): void {
+export const RUN_AUTOMATION_COMMAND = 'CrossCompute:RunAutomation';
+
+function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
+  app.commands.addCommand(RUN_AUTOMATION_COMMAND, {
+    label: 'Run Automation',
+    execute: (args: any) => {
+      console.log('args', args);
+    },
+  });
+
+  const category = 'CrossCompute';
+  palette.addItem({
+    command: RUN_AUTOMATION_COMMAND,
+    category,
+  });
 }
 
 export default extension;
 
 /*
+import { requestAPI } from './crosscompute-jupyterlab-extensions';
+
 requestAPI<any>('get_example')
     .then(data => {
         console.log(data);
