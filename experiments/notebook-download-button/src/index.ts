@@ -10,9 +10,6 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { requestAPI } from './notebook-download-button';
 import DownloadButton from './DownloadButton';
 
-/**
- * Initialization data for the notebook-download-button extension.
- */
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'notebook-download-button',
   autoStart: true,
@@ -32,7 +29,6 @@ function activate(
   mainMenu: IMainMenu,
   state: IStateDB
 ): void {
-  console.log('JupyterLab extension notebook-download-button is activated!');
   const plugInId = 'CrossCompute';
   app.commands.addCommand(CommandIDs.getDownloadUrl, {
     label: 'CrossCompute Download Url',
