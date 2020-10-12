@@ -1,5 +1,6 @@
 import json
 import tornado
+import requests
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 
@@ -8,8 +9,9 @@ class RouteHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
+        response = requests.post('https://services.projects.iixyfqfy.crosscompute.com/prints.json', json={'blocks': [], 'styles': []})
         self.finish(json.dumps({
-            'data': 'whee here and there and everywhere!'
+            'data': response.json(),
         }))
 
 

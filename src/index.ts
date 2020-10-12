@@ -3,6 +3,8 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
+import { requestAPI } from './crosscompute-jupyterlab-extensions';
+import RunAutomationButton from './RunAutomationButton'
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'crosscompute-jupyterlab-extensions',
@@ -17,7 +19,15 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
   app.commands.addCommand(RUN_AUTOMATION_COMMAND, {
     label: 'Run Automation',
     execute: (args: any) => {
-      console.log('args', args);
+      requestAPI<any>('get_example')
+        .then(data => {
+          console.log(data);
+        })
+        .catch(reason => {
+          console.error(
+            `The crosscompute_jupyterlab_extensions server extension appears to be missing.\n${reason}`
+          );
+        });
     },
   });
 
@@ -26,6 +36,9 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
     command: RUN_AUTOMATION_COMMAND,
     category,
   });
+
+  const runAutomationButton = new RunAutomationButton(app);
+  app.docRegistry.addWidgetExtension('Notebook', runAutomationButton);
 }
 
 export default extension;
