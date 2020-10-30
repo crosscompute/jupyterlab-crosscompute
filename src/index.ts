@@ -3,7 +3,7 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
-// import { requestAPI } from './crosscompute-jupyterlab-extensions';
+import { requestAPI } from './crosscompute-jupyterlab-extensions';
 import RunAutomationButton from './RunAutomationButton';
 
 const extension: JupyterFrontEndPlugin<void> = {
@@ -19,37 +19,29 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
   app.commands.addCommand(RUN_AUTOMATION_COMMAND, {
     label: 'Run Automation',
     execute: (args: any) => {
-      console.log(args);
-      const url = '';
-      const id = setInterval(async () => {
-        console.log('fetching');
-        const res = await fetch(url, { method: 'HEAD' });
-        const status = res.status;
-        console.log('status', status);
-        if (status === 200) {
-          clearInterval(id);
-          window.location.href = url;
-        }
-      }, 5000);
-
-      /*
-      requestAPI<any>('get_example?path=' + args.path)
-        .then(url => {
-          let status;
+      const formData = new FormData();
+      formData.append('path', args.path);
+      requestAPI<any>('prints', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(d => {
+          const url = d.url;
           console.log(url);
-          const id = setInterval(() => {
-            fetch(url, { method: 'HEAD' }).then((response: any) => {
-              clearInterval()
-            });
+          const intervalId = setInterval(async () => {
+            const response = await fetch(url, { method: 'HEAD' });
+            const status = response.status;
+            if (status === 200) {
+              clearInterval(intervalId);
+              window.location.href = url;
+            }
           }, 5000);
-          window.location.href = url;
         })
         .catch(reason => {
           console.error(
             `The crosscompute_jupyterlab_extensions server extension appears to be missing.\n${reason}`
           );
         });
-      */
     },
   });
 
