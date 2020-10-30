@@ -26,7 +26,11 @@ class RunAutomationButton
         console.log('----------', panel, context, this._token);
         (window as any).panel = panel;
         (window as any).context = context;
-        // button.setHidden(true);
+        button.node.children[0].setAttribute('disabled', '');
+        setTimeout(() => {
+          button.node.children[0].removeAttribute('disabled');
+        }, 2000);
+
         this._app.commands.execute(RUN_AUTOMATION_COMMAND, {
           path: context.path,
         });
