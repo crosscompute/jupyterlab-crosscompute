@@ -35,7 +35,7 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
               clearInterval(intervalId);
               window.location.href = url;
             }
-          }, 5000);
+          }, 7000);
         })
         .catch(reason => {
           console.error(
