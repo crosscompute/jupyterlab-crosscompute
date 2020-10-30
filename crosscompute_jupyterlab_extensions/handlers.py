@@ -1,6 +1,7 @@
 import json
 import tornado
 import requests
+from crosscompute.temporaries import run
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 
@@ -9,10 +10,22 @@ class RouteHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        response = requests.post('https://services.projects.iixyfqfy.crosscompute.com/prints.json', json={'blocks': [], 'styles': []})
+        path = self.get_argument('path', '')
+        url = run(path)
+        # response = requests.post('https://services.projects.iixyfqfy.crosscompute.com/prints.json', json={'blocks': [], 'styles': []})
         self.finish(json.dumps({
-            'data': response.json(),
+            # 'data': response.json(),
+            'url': url,
         }))
+
+
+'''
+_ GET /crosscompute-jupyterlab-extensions/get_example/path
+_ GET /crosscompute-jupyterlab-extensions/get_example?path=
+
+_ POST /crosscompute-jupyterlab-extensions/automations/abc/Untitled.ipynb
+POST /crosscompute-jupyterlab-extensions/automations?path=abc/Untitled.ipynb
+'''
 
 
 def setup_handlers(web_app):
