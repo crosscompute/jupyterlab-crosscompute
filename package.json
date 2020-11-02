@@ -22,7 +22,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/crosscompute/crosscompute-jupyterlab-extensions.git"
+    "url": "https://github.com/crosscompute/crosscompute-jupyterlab-extensions"
   },
   "scripts": {
     "build": "jlpm run build:lib",

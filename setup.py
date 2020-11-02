@@ -2,9 +2,8 @@ import os
 
 from jupyter_packaging import (
     create_cmdclass, install_npm, ensure_targets,
-    combine_commands, ensure_python, get_version,
-)
-import setuptools
+    combine_commands, ensure_python, get_version)
+from setuptools import find_packages, setup
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -58,7 +57,7 @@ setup_args = dict(
     long_description=long_description,
     long_description_content_type="text/markdown",
     cmdclass=cmdclass,
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
     install_requires=[
         "jupyterlab~=2.0",
     ],
@@ -80,5 +79,5 @@ setup_args = dict(
 )
 
 
-if __name__ == "__main__":
-    setuptools.setup(**setup_args)
+if __name__ == '__main__':
+    setup(**setup_args)
