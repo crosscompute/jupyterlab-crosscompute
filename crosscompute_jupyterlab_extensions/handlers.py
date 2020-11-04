@@ -1,6 +1,6 @@
 import json
 import tornado
-from crosscompute.temporaries import run
+from crosscompute.routines import run_automation
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 
@@ -10,8 +10,8 @@ class RouteHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         path = self.get_argument('path')
-        url = run(path)
-        self.finish(json.dumps({'url': url}))
+        d = run_automation(path)
+        self.finish(json.dumps({'url': d['url']}))
 
 
 def setup_handlers(web_app):
