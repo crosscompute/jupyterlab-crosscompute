@@ -5,6 +5,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { requestAPI } from './crosscompute-jupyterlab-extensions';
 import RunAutomationButton from './RunAutomationButton';
+import { ErrorDialogWidget, ProgressDialogWidget } from './DialogWidget';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'crosscompute-jupyterlab-extensions',
@@ -21,13 +22,14 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
     execute: (args: any) => {
       const formData = new FormData();
       formData.append('path', args.path);
+      const progressWidget = ProgressDialogWidget();
       requestAPI<any>('prints', {
         method: 'POST',
         body: formData,
       })
         .then(d => {
           const url = d.url;
-          console.log(url);
+          progressWidget.dispose();
           const intervalId = setInterval(async () => {
             const response = await fetch(url, { method: 'HEAD' });
             const status = response.status;
@@ -38,6 +40,8 @@ function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
           }, 7000);
         })
         .catch(reason => {
+          progressWidget.dispose();
+          ErrorDialogWidget(reason.toString());
           console.error(
             `The crosscompute_jupyterlab_extensions server extension appears to be missing.\n${reason}`
           );
