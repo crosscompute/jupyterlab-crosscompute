@@ -1,8 +1,8 @@
 import json
 import tornado
-from crosscompute.temporaries import run
 from crosscompute.exceptions import (
     CrossComputeDefinitionError, CrossComputeExecutionError, CrossComputeError)
+from crosscompute.routines import run_automation
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 
@@ -13,8 +13,8 @@ class RouteHandler(APIHandler):
     def post(self):
         path = self.get_argument('path')
         try:
-            url = run(path)
-            self.finish(json.dumps({ 'url': url }))
+            d = run_automation(path)
+            self.finish(json.dumps({'url': d['url']}))
         except (
             CrossComputeError,
             CrossComputeDefinitionError,
