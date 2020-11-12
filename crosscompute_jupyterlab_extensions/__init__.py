@@ -10,4 +10,4 @@ def _jupyter_server_extension_paths():
 
 def load_jupyter_server_extension(lab_app):
     setup_handlers(lab_app.web_app)
-    lab_app.log.info('Registered /crosscompute-jupyterlab-extensions')
+    lab_app.log.info('Registered crosscompute-jupyterlab-extensions')

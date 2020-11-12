@@ -22,9 +22,9 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/crosscompute/crosscompute-jupyterlab-extensions.git"
+    "url": "https://github.com/crosscompute/crosscompute-jupyterlab-extensions"
   },
-  "scripts": { 
+  "scripts": {
     "build": "jlpm run build:lib",
     "build:labextension": "cd crosscompute_jupyterlab_extensions && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../..",
     "build:lib": "tsc",
@@ -33,7 +33,6 @@
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
     "clean:labextension": "rimraf crosscompute_jupyterlab_extensions/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
-
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
     "prepare": "jlpm run clean && jlpm run build",
@@ -42,16 +41,16 @@
   "dependencies": {
     "@jupyterlab/application": "^2.0.0",
     "@jupyterlab/coreutils": "^4.0.0",
+    "@jupyterlab/notebook": "^2.2.6",
     "@jupyterlab/services": "^5.0.0"
-
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-prettier": "^3.1.2", 
-    "mkdirp": "^1.0.3", 
+    "eslint-plugin-prettier": "^3.1.2",
+    "mkdirp": "^1.0.3",
     "prettier": "1.16.4",
     "rimraf": "^2.6.1",
     "typescript": "~3.7.0"
@@ -59,17 +58,17 @@
   "sideEffects": [
     "style/*.css"
   ],
-  "jupyterlab": { 
+  "jupyterlab": {
     "discovery": {
-        "server": {
-          "managers": [
-            "pip"
-          ],
-          "base": {
-            "name": "crosscompute_jupyterlab_extensions"
-          }
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "crosscompute_jupyterlab_extensions"
         }
-    }, 
+      }
+    },
     "extension": true
   }
 }
