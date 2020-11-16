@@ -3,58 +3,69 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
+import { INotebookTracker } from '@jupyterlab/notebook';
 import { requestAPI } from './crosscompute-jupyterlab-extensions';
 import RunAutomationButton from './RunAutomationButton';
 import { ErrorDialogWidget, ProgressDialogWidget } from './DialogWidget';
+import {
+  COMMAND_PALETTE_CATEGORY,
+  RUN_AUTOMATION_COMMAND,
+  RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS,
+} from './constants';
 
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'crosscompute-jupyterlab-extensions',
   autoStart: true,
-  requires: [ICommandPalette],
+  requires: [INotebookTracker, ICommandPalette],
   activate,
 };
 
-export const RUN_AUTOMATION_COMMAND = 'CrossCompute:RunAutomation';
-
-function activate(app: JupyterFrontEnd, palette: ICommandPalette): void {
+function activate(
+  app: JupyterFrontEnd,
+  tracker: INotebookTracker,
+  palette: ICommandPalette
+): void {
   app.commands.addCommand(RUN_AUTOMATION_COMMAND, {
     label: 'Run Automation',
-    execute: (args: any) => {
-      const formData = new FormData();
-      formData.append('path', args.path);
+    execute: async () => {
+      const { context } = tracker.currentWidget;
+
+      // Save notebook
+      if (context.model.dirty && !context.model.readOnly) {
+        await context.save();
+      }
+
+      let pollingIntervalId: number;
       const progressWidget = ProgressDialogWidget();
+      const formData = new FormData();
+      formData.append('path', context.path);
       requestAPI<any>('prints', {
         method: 'POST',
         body: formData,
       })
         .then(d => {
-          const url = d.url;
-          progressWidget.dispose();
-          const intervalId = setInterval(async () => {
+          const { url } = d;
+          pollingIntervalId = setInterval(async () => {
             const response = await fetch(url, { method: 'HEAD' });
             const status = response.status;
             if (status === 200) {
-              clearInterval(intervalId);
+              clearInterval(pollingIntervalId);
               window.location.href = url;
             }
-          }, 7000);
+          }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
+          progressWidget.dispose();
         })
         .catch(reason => {
+          clearInterval(pollingIntervalId);
           progressWidget.dispose();
           ErrorDialogWidget(reason.toString());
-          console.error(
-            `The crosscompute_jupyterlab_extensions server extension appears to be missing.\n${reason}`
-          );
         });
     },
   });
-
-  const category = 'CrossCompute';
-  palette.addItem({
-    command: RUN_AUTOMATION_COMMAND,
-    category,
-  });
-
+  // Add commands to command palette
+  const category = COMMAND_PALETTE_CATEGORY;
+  palette.addItem({ command: RUN_AUTOMATION_COMMAND, category });
+  // Add widgets
   const runAutomationButton = new RunAutomationButton(app);
   app.docRegistry.addWidgetExtension('Notebook', runAutomationButton);
 }

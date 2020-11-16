@@ -1,7 +1,9 @@
 import json
 import tornado
 from crosscompute.constants import AUTOMATION_FILE_NAME
-from crosscompute.exceptions import CrossComputeError
+from crosscompute.exceptions import (
+    CrossComputeDefinitionError,
+    CrossComputeExecutionError)
 from crosscompute.routines import load_relevant_path, run_automation
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
@@ -17,10 +19,13 @@ class RouteHandler(APIHandler):
                 path, AUTOMATION_FILE_NAME, ['automation'])
             d = run_automation(automation_definition, is_mock=False)
             self.finish(json.dumps({'url': d['url']}))
-        except CrossComputeError as e:
+        except (
+            CrossComputeDefinitionError,
+            CrossComputeExecutionError,
+        ) as e:
             self.set_status(400)
             self.finish(str(e))
-        except Exception as e:
+        except (Exception, SystemExit) as e:
             self.set_status(500)
             self.finish(str(e))
 
