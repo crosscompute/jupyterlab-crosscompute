@@ -50,10 +50,10 @@ function activate(
             const status = response.status;
             if (status === 200) {
               clearInterval(pollingIntervalId);
+              progressWidget.dispose();
               window.location.href = url;
             }
           }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
-          progressWidget.dispose();
         })
         .catch(reason => {
           clearInterval(pollingIntervalId);
