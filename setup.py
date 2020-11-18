@@ -38,6 +38,7 @@ setup_args = dict(
     packages=find_packages(),
     install_requires=[
         'jupyterlab ~= 2.0',
+        'crosscompute >= 0.8.4.1',
     ],
     zip_safe=False,
     include_package_data=True,
