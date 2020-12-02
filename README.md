@@ -88,3 +88,9 @@ Now every change will be built locally and bundled into JupyterLab. Be sure to r
 pip uninstall crosscompute_jupyterlab_extensions
 jupyter labextension uninstall crosscompute-jupyterlab-extensions
 ```
+
+## Acknowledgments
+
+Thank you to [Rodrigo Guarachi](https://github.com/rmguarachi) for creating a custom JupyterLab extension and integration with the CrossCompute framework and platform.
+
+Thank you to [Miguel Angel Gordián](https://github.com/zoek1) for testing our JupyterLab extension in different computational environments.
