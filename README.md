@@ -16,6 +16,8 @@ Note: You will need NodeJS to install the extension.
 
 ```bash
 pip install crosscompute_jupyterlab_extensions
+jupyter serverextension enable --py crosscompute_jupyterlab_extensions --sys-prefix
+jupyter labextension install .
 jupyter lab build
 ```
 
