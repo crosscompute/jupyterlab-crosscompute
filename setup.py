@@ -39,6 +39,7 @@ setup_args = dict(
     install_requires=[
         'jupyterlab ~= 2.0',
         'crosscompute >= 0.8.4.1',
+        'invisibleroads-macros-security',
     ],
     zip_safe=False,
     include_package_data=True,

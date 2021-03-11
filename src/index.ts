@@ -6,11 +6,11 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { requestAPI } from './crosscompute-jupyterlab-extensions';
 import RunAutomationButton from './RunAutomationButton';
-import { ErrorDialogWidget, ProgressDialogWidget } from './DialogWidget';
+// import { ErrorDialogWidget, ProgressDialogWidget } from './DialogWidget';
 import {
   COMMAND_PALETTE_CATEGORY,
   RUN_AUTOMATION_COMMAND,
-  RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS,
+  // RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS,
 } from './constants';
 
 const extension: JupyterFrontEndPlugin<void> = {
@@ -35,14 +35,17 @@ function activate(
         await context.save();
       }
 
-      let pollingIntervalId: number;
-      const progressWidget = ProgressDialogWidget();
+      // let pollingIntervalId: number;
+      // const progressWidget = ProgressDialogWidget();
       const formData = new FormData();
       formData.append('path', context.path);
       requestAPI<any>('prints', {
         method: 'POST',
         body: formData,
-      })
+      }).then(d => {
+        console.log(d);
+      });
+      /*
         .then(d => {
           const { url } = d;
           pollingIntervalId = setInterval(async () => {
@@ -60,6 +63,7 @@ function activate(
           progressWidget.dispose();
           ErrorDialogWidget(reason.toString());
         });
+      */
     },
   });
   // Add commands to command palette
