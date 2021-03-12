@@ -12,7 +12,7 @@ export function LogDialogWidget(logId: string | null): any {
     title: NAMESPACE + ' Log',
     body: new LogWidget(logId),
     host: document.body,
-    buttons: [Dialog.okButton({ label: 'Close' })],
+    buttons: [Dialog.okButton({ label: 'Cancel' })],
   });
   dialog.launch().catch(() => null);
   return dialog;
@@ -42,9 +42,25 @@ interface IEventResponseData {
   result: any;
 }
 
+function EventComponent(props: any) {
+  const event = props.event;
+  return (
+    <div style={{ border: '1px solid black', marginBottom: '1rem', padding: '1rem' }}>
+      {Object.keys(event).map(key => {
+        return (
+          <div key={key}>
+            {key}
+            <pre>{JSON.stringify(event[key])}</pre>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function LogComponent({ logId }: { logId: string }): JSX.Element {
   const logSourceRef = useRef<any>();
-  const [text, setText] = useState('');
+  const [events, setEvents] = useState([]);
 
   function downloadData(url: string): void {
     console.log(url);
@@ -53,7 +69,8 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
       const status = response.status;
       if (status === 200) {
         clearInterval(pollingIntervalId);
-        setText((prevState: string) => 'Download is ready' + '\n' + prevState);
+        const newEvent = { Status: 'Download is ready' };
+        setEvents((prevState: any) => [newEvent, ...prevState]);
         window.location.href = url;
       }
     }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
@@ -71,7 +88,7 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
         downloadData(payload.url);
       }
       console.log(e);
-      setText((prevState: string) => JSON.stringify(data) + '\n' + prevState);
+      setEvents((prevState: any) => [data, ...prevState]);
     };
     return (): void => {
       console.log('closing connection');
@@ -82,14 +99,16 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
   }, []);
 
   return (
-    <pre
+    <div
       style={{
-        maxHeight: '10em',
+        maxHeight: '400px',
         maxWidth: '800px',
         overflow: 'auto',
       }}
     >
-      {text}
-    </pre>
+      {events.map((eventData, index) => (
+        <EventComponent key={index} event={eventData} />
+      ))}
+    </div>
   );
 }
