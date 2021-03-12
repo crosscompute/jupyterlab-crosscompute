@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { Dialog } from '@jupyterlab/apputils';
-import { NAMESPACE } from './constants';
+import {
+  BASE_PATH,
+  NAMESPACE,
+  RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS,
+} from './constants';
 
 export function LogDialogWidget(logId: string | null): any {
   const dialog = new Dialog({
@@ -27,14 +31,65 @@ export class LogWidget extends ReactWidget {
   private logId: string;
 }
 
-export function LogComponent({ logId }: { logId: string }): JSX.Element {
-  const [text, setText] = useState();
-  const logsUrl = '/logs/' + logId;
-  const logSource = new EventSource(logsUrl);
-  logSource.onmessage = function(e): void {
-    console.log(e);
-    setText(e);
-  };
+interface IPayload {
+  url: string;
+}
 
-  return <pre style={{ maxHeight: '10em', overflow: 'auto' }}>{text}</pre>;
+interface IEventResponseData {
+  payload?: IPayload;
+  index?: number;
+  count?: number;
+  result: any;
+}
+
+export function LogComponent({ logId }: { logId: string }): JSX.Element {
+  const logSourceRef = useRef<any>();
+  const [text, setText] = useState('');
+
+  function downloadData(url: string): void {
+    console.log(url);
+    const pollingIntervalId = setInterval(async () => {
+      const response = await fetch(url, { method: 'HEAD' });
+      const status = response.status;
+      if (status === 200) {
+        clearInterval(pollingIntervalId);
+        setText((prevState: string) => 'Download is ready' + '\n' + prevState);
+        window.location.href = url;
+      }
+    }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
+  }
+
+  useEffect(() => {
+    const logsUrl = '/' + BASE_PATH + '/logs/' + logId;
+    logSourceRef.current = new EventSource(logsUrl);
+    logSourceRef.current.onmessage = function(e: any): void {
+      const data: IEventResponseData = JSON.parse(e.data);
+      const payload: IPayload = data.payload;
+      console.log('check if download event', payload);
+      if (payload) {
+        console.log('downloadData called');
+        downloadData(payload.url);
+      }
+      console.log(e);
+      setText((prevState: string) => JSON.stringify(data) + '\n' + prevState);
+    };
+    return (): void => {
+      console.log('closing connection');
+      if (logSourceRef.current) {
+        logSourceRef.current.close();
+      }
+    };
+  }, []);
+
+  return (
+    <pre
+      style={{
+        maxHeight: '10em',
+        maxWidth: '800px',
+        overflow: 'auto',
+      }}
+    >
+      {text}
+    </pre>
+  );
 }

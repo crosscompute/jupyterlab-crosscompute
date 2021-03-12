@@ -39,6 +39,7 @@ class PrintsHandler(APIHandler):
             except (Exception, SystemExit) as e:
                 queue.put({'error': {'type': 'system', 'data': e.args[0]}})
 
+        print('post', QUEUE_BY_LOG_ID)
         executor = ThreadPoolExecutor()
         executor.submit(work)
         self.finish({'id': log_id})
@@ -49,6 +50,8 @@ class LogsHandler(APIHandler):
     @tornado.web.authenticated
     @tornado.gen.coroutine
     def get(self, log_id):
+        print('get', QUEUE_BY_LOG_ID)
+
         self.set_header('content-type', 'text/event-stream')
         self.set_header('cache-control', 'no-cache')
         try:
