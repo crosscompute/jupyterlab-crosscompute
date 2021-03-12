@@ -1,48 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { Dialog } from '@jupyterlab/apputils';
 import { NAMESPACE } from './constants';
 
-export class ErrorWidget extends ReactWidget {
-  constructor(reason: string | null) {
+export function LogDialogWidget(logId: string | null): any {
+  const dialog = new Dialog({
+    title: NAMESPACE + ' Log',
+    body: new LogWidget(logId),
+    host: document.body,
+    buttons: [Dialog.okButton({ label: 'Close' })],
+  });
+  dialog.launch().catch(() => null);
+  return dialog;
+}
+
+export class LogWidget extends ReactWidget {
+  constructor(logId: string) {
     super();
-    this._reason = reason;
+    this.logId = logId;
   }
 
   render(): JSX.Element {
-    return <span>{this._reason}</span>;
+    return <LogComponent logId={this.logId} />;
   }
 
-  private _reason: string;
+  private logId: string;
 }
 
-export function ErrorDialogWidget(reason: string | null): any {
-  const dialog = new Dialog({
-    title: NAMESPACE + ' Error',
-    body: new ErrorWidget(reason),
-    host: document.body,
-    buttons: [Dialog.okButton({ label: 'Close' })],
-  });
-  dialog.launch().catch(() => null);
-  return dialog;
-}
+export function LogComponent({ logId }: { logId: string }): JSX.Element {
+  const [text, setText] = useState();
+  const logsUrl = '/logs/' + logId;
+  const logSource = new EventSource(logsUrl);
+  logSource.onmessage = function(e): void {
+    console.log(e);
+    setText(e);
+  };
 
-const ProgressBody = ReactWidget.create(
-  <>
-    <div className="jp-SpinnerContent" />
-    <div style={{ textAlign: 'center' }}>
-      <span>Running Automation...</span>
-    </div>
-  </>
-);
-
-export function ProgressDialogWidget(): any {
-  const dialog = new Dialog({
-    title: NAMESPACE,
-    body: ProgressBody,
-    host: document.body,
-    buttons: [Dialog.okButton({ label: 'Close' })],
-  });
-  dialog.launch().catch(() => null);
-  return dialog;
+  return <pre style={{ maxHeight: '10em', overflow: 'auto' }}>{text}</pre>;
 }

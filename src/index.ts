@@ -6,7 +6,7 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { requestAPI } from './crosscompute-jupyterlab-extensions';
 import RunAutomationButton from './RunAutomationButton';
-// import { ErrorDialogWidget, ProgressDialogWidget } from './DialogWidget';
+import { LogDialogWidget } from './DialogWidget';
 import {
   COMMAND_PALETTE_CATEGORY,
   RUN_AUTOMATION_COMMAND,
@@ -36,15 +36,13 @@ function activate(
       }
 
       // let pollingIntervalId: number;
-      // const progressWidget = ProgressDialogWidget();
       const formData = new FormData();
       formData.append('path', context.path);
-      requestAPI<any>('prints', {
+      const d = await requestAPI<any>('prints', {
         method: 'POST',
         body: formData,
-      }).then(d => {
-        console.log(d);
       });
+      LogDialogWidget(d.id);
       /*
         .then(d => {
           const { url } = d;
@@ -58,11 +56,6 @@ function activate(
             }
           }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
         })
-        .catch(reason => {
-          clearInterval(pollingIntervalId);
-          progressWidget.dispose();
-          ErrorDialogWidget(reason.toString());
-        });
       */
     },
   });

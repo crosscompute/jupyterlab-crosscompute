@@ -6,13 +6,14 @@ from crosscompute.exceptions import (
     CrossComputeDefinitionError,
     CrossComputeExecutionError)
 from crosscompute.routines import load_relevant_path, run_automation
-from invisibleroads_macros_security import make_random_string
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 from queue import Queue
 
+from .macros import get_unique_id
 
-LOG_ID_LENGTH = 256
+
+LOG_ID_LENGTH = 64
 QUEUE_BY_LOG_ID = {}
 
 
@@ -21,62 +22,47 @@ class PrintsHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         path = self.get_argument('path')
-        while True:
-            log_id = make_random_string(LOG_ID_LENGTH)
-            if log_id not in QUEUE_BY_LOG_ID:
-                break
+        log_id = get_unique_id(LOG_ID_LENGTH, QUEUE_BY_LOG_ID)
         queue = QUEUE_BY_LOG_ID[log_id] = Queue()
-        def log(x):
-            queue.put(x)
 
         def work():
             try:
                 automation_definition = load_relevant_path(
                     path, AUTOMATION_FILE_NAME, ['automation'])
                 d = run_automation(
-                    automation_definition, is_mock=False, log=log)
-                queue.put({'url': d['url']})
+                    automation_definition, is_mock=False, log=queue.put)
+                queue.put({'payload': {'url': d['url']}})
             except CrossComputeDefinitionError as e:
-                queue.put({'error': e.args[0], })
-                # TODO: Decide error format
-                # TODO: Capture error type
-                {'error': {'x': 1}}
+                queue.put({'error': {'type': 'definition', 'data': e.args[0]}})
             except CrossComputeExecutionError as e:
-                queue.put({'error': e.args[0]})
+                queue.put({'error': {'type': 'execution', 'data': e.args[0]}})
             except (Exception, SystemExit) as e:
-                queue.put({'error': str(e)})
-        
+                queue.put({'error': {'type': 'system', 'data': e.args[0]}})
+
         executor = ThreadPoolExecutor()
         executor.submit(work)
-
-
         self.finish({'id': log_id})
 
 
 class LogsHandler(APIHandler):
 
-    def initialize(self):
-        super().initialize()
-        self.set_header('content-type', 'text/event-stream')
-        self.set_header('cache-control', 'no-cache')
-
     @tornado.web.authenticated
     @tornado.gen.coroutine
     def get(self, log_id):
-        yield tornado.gen.sleep(10)
-        # exit when it gets signal from queue
-        # loop while queue is empty
-        # publish if it is not empty
+        self.set_header('content-type', 'text/event-stream')
+        self.set_header('cache-control', 'no-cache')
+        try:
+            queue = QUEUE_BY_LOG_ID[log_id]
+        except KeyError:
+            raise tornado.web.HTTPError(404)
         while True:
-            try:
-                queue = QUEUE_BY_LOG_ID[log_id]
-            except KeyError:
-                yield tornado.gen.sleep(1)
-            else:
-                while not queue.empty():
-                    data = queue.get()
-                    # TODO: Exit when it gets signal from queue
-                    yield self.publish(json.dumps(data))
+            while not queue.empty():
+                d = queue.get()
+                yield self.publish(json.dumps(d))
+                if 'payload' in d or 'error' in d:
+                    del QUEUE_BY_LOG_ID[log_id]
+                    return
+            yield tornado.gen.sleep(1)
 
     @tornado.gen.coroutine
     def publish(self, data):
