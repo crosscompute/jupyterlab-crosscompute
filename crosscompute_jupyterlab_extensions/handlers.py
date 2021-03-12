@@ -1,7 +1,6 @@
 import json
 import tornado
-import concurrent.futures
-from queue import Queue
+from concurrent.futures import ThreadPoolExecutor
 from crosscompute.constants import AUTOMATION_FILE_NAME
 from crosscompute.exceptions import (
     CrossComputeDefinitionError,
@@ -10,6 +9,7 @@ from crosscompute.routines import load_relevant_path, run_automation
 from invisibleroads_macros_security import make_random_string
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
+from queue import Queue
 
 
 LOG_ID_LENGTH = 256
@@ -20,57 +20,33 @@ class PrintsHandler(APIHandler):
 
     @tornado.web.authenticated
     def post(self):
-        '''
         path = self.get_argument('path')
-        try:
-            automation_definition = load_relevant_path(
-                path, AUTOMATION_FILE_NAME, ['automation'])
-            d = run_automation(automation_definition, is_mock=False)
-            self.finish(json.dumps({'url': d['url']}))
-        except (
-            CrossComputeDefinitionError,
-            CrossComputeExecutionError,
-        ) as e:
-            self.set_status(400)
-            self.finish(str(e))
-        except (Exception, SystemExit) as e:
-            self.set_status(500)
-            self.finish(str(e))
-        '''
-        path = self.get_argument('path')
-        log_id = make_random_string(LOG_ID_LENGTH)
-
-        '''
-        from tornado.ioloop import PeriodicCallback
-        import time
-
-        def get_next():
-            EVENTS_BY_LOG_ID[log_id] = EVENTS_BY_LOG_ID.get(log_id, []) + [{
-                'x': time.time()}]
-
-        checker = PeriodicCallback(lambda: get_next(), 1000)
-        checker.start()
-        '''
-
-        QUEUE_BY_LOG_ID[log_id] = queue = Queue()
+        while True:
+            log_id = make_random_string(LOG_ID_LENGTH)
+            if log_id not in QUEUE_BY_LOG_ID:
+                break
+        queue = QUEUE_BY_LOG_ID[log_id] = Queue()
+        def log(x):
+            queue.put(x)
 
         def work():
             try:
                 automation_definition = load_relevant_path(
                     path, AUTOMATION_FILE_NAME, ['automation'])
-                d = run_automation(automation_definition, is_mock=False)
+                d = run_automation(
+                    automation_definition, is_mock=False, log=log)
                 queue.put({'url': d['url']})
-                print('WE ARE DONE', d)
-            except (
-                CrossComputeDefinitionError,
-                CrossComputeExecutionError,
-            ) as e:
-                queue.put({'error': str(e)})
+            except CrossComputeDefinitionError as e:
+                queue.put({'error': e.args[0], })
+                # TODO: Decide error format
+                # TODO: Capture error type
+                {'error': {'x': 1}}
+            except CrossComputeExecutionError as e:
+                queue.put({'error': e.args[0]})
             except (Exception, SystemExit) as e:
                 queue.put({'error': str(e)})
-            
         
-        executor = concurrent.futures.ThreadPoolExecutor()
+        executor = ThreadPoolExecutor()
         executor.submit(work)
 
 
