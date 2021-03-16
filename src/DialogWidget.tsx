@@ -42,15 +42,26 @@ interface IEventResponseData {
   result: any;
 }
 
-function EventComponent(props: any) {
+function EventComponent(props: any): JSX.Element {
   const event = props.event;
   return (
-    <div style={{ border: '1px solid black', marginBottom: '1rem', padding: '1rem' }}>
+    <div
+      style={{
+        border: '1px solid black',
+        marginBottom: '1rem',
+        padding: '1rem',
+      }}
+    >
       {Object.keys(event).map(key => {
+        const data = event[key].data;
         return (
           <div key={key}>
-            {key}
-            <pre>{JSON.stringify(event[key])}</pre>
+            {key.toUpperCase()}
+            <pre style={{ whiteSpace: 'pre-wrap' }}>
+              {Object.keys(data).map((key: string) => {
+                return `${key}: ${data[key]}`;
+              })}
+            </pre>
           </div>
         );
       })}
@@ -69,8 +80,6 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
       const status = response.status;
       if (status === 200) {
         clearInterval(pollingIntervalId);
-        const newEvent = { Status: 'Download is ready' };
-        setEvents((prevState: any) => [newEvent, ...prevState]);
         window.location.href = url;
       }
     }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
