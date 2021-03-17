@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { Dialog } from '@jupyterlab/apputils';
+import { URLExt } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
 import {
   BASE_PATH,
   NAMESPACE,
@@ -102,7 +104,8 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
   }
 
   useEffect(() => {
-    const logsUrl = '/' + BASE_PATH + '/logs/' + logId;
+    const settings = ServerConnection.makeSettings();
+    const logsUrl = URLExt.join(settings.baseUrl, BASE_PATH, 'logs', logId);
     logSourceRef.current = new EventSource(logsUrl);
     logSourceRef.current.onmessage = function(e: any): void {
       console.log(e);
