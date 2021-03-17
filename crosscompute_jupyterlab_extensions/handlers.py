@@ -37,7 +37,9 @@ class PrintsHandler(APIHandler):
 
         executor = ThreadPoolExecutor()
         executor.submit(work)
+        # TODO: Use queues properly
         self.finish({'id': log_id})
+        self.flush()
 
 
 class LogsHandler(APIHandler):
