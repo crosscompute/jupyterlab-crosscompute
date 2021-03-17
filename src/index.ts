@@ -43,20 +43,6 @@ function activate(
         body: formData,
       });
       LogDialogWidget(d.id);
-      /*
-        .then(d => {
-          const { url } = d;
-          pollingIntervalId = setInterval(async () => {
-            const response = await fetch(url, { method: 'HEAD' });
-            const status = response.status;
-            if (status === 200) {
-              clearInterval(pollingIntervalId);
-              progressWidget.dispose();
-              window.location.href = url;
-            }
-          }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
-        })
-      */
     },
   });
   // Add commands to command palette
