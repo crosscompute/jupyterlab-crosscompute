@@ -11,7 +11,7 @@ import {
 
 export function LogDialogWidget(logId: string | null): any {
   const dialog = new Dialog({
-    title: NAMESPACE + ' Log',
+    title: NAMESPACE + ' Automation',
     body: new LogWidget(logId),
     host: document.body,
     buttons: [Dialog.okButton({ label: 'Cancel' })],
@@ -37,7 +37,7 @@ interface IPayload {
   location: string;
 }
 
-interface IEventResponseData {
+interface IEvent{
   status: string;
   data: any;
 }
@@ -70,10 +70,7 @@ export function EventRunningComponent(props: any): JSX.Element {
   const data = props.data;
   return (
     <div>
-      <h1>
-        Running... {data.index + 1}/{data.count}
-      </h1>
-      {renderPre(data.definition)}
+      {typeof data === 'string' ? data : renderPre(data)}
     </div>
   );
 }
@@ -89,7 +86,7 @@ function renderPre(obj: any): JSX.Element[] {
 
 export function LogComponent({ logId }: { logId: string }): JSX.Element {
   const logSourceRef = useRef<any>();
-  const [events, setEvents] = useState([]);
+  const [state, setState] = useState({});
 
   function downloadData(url: string): void {
     console.log(url);
@@ -109,15 +106,24 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
     logSourceRef.current = new EventSource(logsUrl);
     logSourceRef.current.onmessage = function(e: any): void {
       console.log(e);
-      const eventData: IEventResponseData = JSON.parse(
-        e.data
-      ) as IEventResponseData;
-      console.log('message data', eventData);
-      if (eventData.status === 'DONE') {
-        console.log('downloadData called');
-        const { data } = eventData;
-        downloadData(data.location);
+      const event: IEvent = JSON.parse(e.data) as IEvent;
+      const { status: eventStatus, data: eventData } = event;
+      switch (eventStatus) {
+        case 'UPDATE': {
+          setEvents((prevState: any) => {
+
+          });
+        }
+        case 'ALERT': {
+          setState();
+        }
+        case 'DOWNLOAD': {
+          downloadData(eventData.location);
+          break;
+        }
       }
+      event.data
+      setState
       setEvents((prevState: any) => [eventData, ...prevState]);
     };
 
@@ -132,21 +138,24 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
   return (
     <div
       style={{
-        maxHeight: '400px',
-        maxWidth: '800px',
+        maxHeight: '100%',
+        maxWidth: '100%',
         overflow: 'auto',
       }}
     >
-      {events.map((eventData, index) => {
-        const { status, data } = eventData;
-        if (status === 'DONE') {
-          return <EventDoneComponent key={index} data={data} />;
-        }
-        if (status === 'RUNNING') {
-          return <EventRunningComponent key={index} data={data} />;
-        }
-        return <EventErrorComponent key={index} data={data} />;
-      })}
+      {events.length
+        ? events.map((eventData, eventIndex) => {
+            const { status, data } = eventData;
+            switch (status) {
+              case 'RUNNING':
+                return <EventRunningComponent key={eventIndex} data={data} />;
+              case 'ERROR':
+                return <EventErrorComponent key={eventIndex} data={data} />;
+              case 'DONE':
+                return <EventDoneComponent key={eventIndex} data={data} />;
+            }
+          })
+        : 'Your report is being generated. Please be patient.'}
     </div>
   );
 }

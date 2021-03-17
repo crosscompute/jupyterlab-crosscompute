@@ -6,6 +6,7 @@ from crosscompute.routines import load_relevant_path, run_automation
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 from queue import Queue
+from tornado.ioloop import IOLoop
 
 from .macros import get_unique_id
 
@@ -17,13 +18,14 @@ QUEUE_BY_LOG_ID = {}
 class PrintsHandler(APIHandler):
 
     @tornado.web.authenticated
-    def post(self):
+    async def post(self):
         path = self.get_argument('path')
         log_id = get_unique_id(LOG_ID_LENGTH, QUEUE_BY_LOG_ID)
         queue = QUEUE_BY_LOG_ID[log_id] = Queue()
 
         def log(d):
-            queue.put({'status': 'RUNNING', 'data': d})
+            print(d)
+            queue.put({'type': 'UPDATE', 'data': d})
 
         def work():
             try:
@@ -31,22 +33,20 @@ class PrintsHandler(APIHandler):
                     path, AUTOMATION_FILE_NAME, ['automation'])
                 d = run_automation(
                     automation_definition, is_mock=False, log=log)
-                queue.put({'status': 'DONE', 'data': {'location': d['url']}})
+                queue.put({'type': 'DOWNLOAD', 'data': {'location': d['url']}})
+                # !!!
+                print(d)
             except (Exception, SystemExit) as e:
-                queue.put({'status': 'ERROR', 'data': e.args[0]})
+                queue.put({'type': 'ALERT', 'data': e.args[0]})
 
-        executor = ThreadPoolExecutor()
-        executor.submit(work)
-        # TODO: Use queues properly
         self.finish({'id': log_id})
-        self.flush()
+        await IOLoop.current().run_in_executor(None, work)
 
 
 class LogsHandler(APIHandler):
 
     @tornado.web.authenticated
-    @tornado.gen.coroutine
-    def get(self, log_id):
+    async def get(self, log_id):
         self.set_header('content-type', 'text/event-stream')
         self.set_header('cache-control', 'no-cache')
         try:
@@ -56,17 +56,16 @@ class LogsHandler(APIHandler):
         while True:
             while not queue.empty():
                 d = queue.get()
-                yield self.publish(json.dumps(d))
+                await self.publish(json.dumps(d))
                 if 'payload' in d or 'error' in d:
                     del QUEUE_BY_LOG_ID[log_id]
                     return
-            yield tornado.gen.sleep(1)
+            await tornado.gen.sleep(1)
 
-    @tornado.gen.coroutine
-    def publish(self, data):
+    async def publish(self, data):
         try:
             self.write('data: {}\n\n'.format(data))
-            yield self.flush()
+            await self.flush()
         except tornado.iostream.StreamClosedError:
             pass
 
