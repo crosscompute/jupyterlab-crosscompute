@@ -34,28 +34,68 @@ export class LogWidget extends ReactWidget {
 }
 
 interface IPayload {
-  url: string;
+  location: string;
 }
 
 interface IEventResponseData {
-  payload?: IPayload;
-  index?: number;
-  count?: number;
-  result: any;
+  status: string;
+  data: any;
 }
 
-function EventComponent(props: any) {
-  const event = props.event;
+export function EventDoneComponent(props: any): JSX.Element {
+  const data = props.data as IPayload;
+  const { location } = data;
   return (
-    <div style={{ border: '1px solid black', marginBottom: '1rem', padding: '1rem' }}>
-      {Object.keys(event).map(key => {
-        return (
-          <div key={key}>
-            {key}
-            <pre>{JSON.stringify(event[key])}</pre>
-          </div>
-        );
-      })}
+    <div>
+      Completed
+      <pre>Download link: {location}</pre>
+    </div>
+  );
+}
+
+function renderPre(obj: any): JSX.Element[] {
+  return Object.keys(obj).map(key => {
+    return (
+      <div key={key}>
+        <pre>{key}</pre>
+        {typeof obj[key] === 'string' ? (
+          <pre>{obj[key]}</pre>
+        ) : (
+          <pre>{JSON.stringify(obj[key])}</pre>
+        )}
+      </div>
+    );
+  });
+}
+
+export function EventErrorComponent(props: any): JSX.Element {
+  const data = props.data;
+
+  if (typeof data === 'string') {
+    return (
+      <div>
+        <pre>{data}</pre>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      { /*
+      {data.stderr && <pre>{data.stderr}</pre>}
+      {data.stdout && <pre>{data.stdout}</pre>}
+         */}
+      {renderPre(data)}
+    </div>
+  );
+}
+
+export function EventRunningComponent(props: any): JSX.Element {
+  const data = props.data;
+  return (
+    <div>
+      Running... {data.index}/{data.count}
+      {renderPre(data.definition)}
     </div>
   );
 }
@@ -71,8 +111,6 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
       const status = response.status;
       if (status === 200) {
         clearInterval(pollingIntervalId);
-        const newEvent = { Status: 'Download is ready' };
-        setEvents((prevState: any) => [newEvent, ...prevState]);
         window.location.href = url;
       }
     }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
@@ -83,16 +121,19 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
     const logsUrl = URLExt.join(settings.baseUrl, BASE_PATH, 'logs', logId);
     logSourceRef.current = new EventSource(logsUrl);
     logSourceRef.current.onmessage = function(e: any): void {
-      const data: IEventResponseData = JSON.parse(e.data);
-      const payload: IPayload = data.payload;
-      console.log('check if download event', payload);
-      if (payload) {
-        console.log('downloadData called');
-        downloadData(payload.url);
-      }
       console.log(e);
-      setEvents((prevState: any) => [data, ...prevState]);
+      const eventData: IEventResponseData = JSON.parse(
+        e.data
+      ) as IEventResponseData;
+      console.log('message data', eventData);
+      if (eventData.status === 'DONE') {
+        console.log('downloadData called');
+        const { data } = eventData;
+        downloadData(data.location);
+      }
+      setEvents((prevState: any) => [eventData, ...prevState]);
     };
+
     return (): void => {
       console.log('closing connection');
       if (logSourceRef.current) {
@@ -109,9 +150,16 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
         overflow: 'auto',
       }}
     >
-      {events.map((eventData, index) => (
-        <EventComponent key={index} event={eventData} />
-      ))}
+      {events.map((eventData, index) => {
+        const { status, data } = eventData;
+        if (status === 'DONE') {
+          return <EventDoneComponent key={index} data={data} />;
+        }
+        if (status === 'RUNNING') {
+          return <EventRunningComponent key={index} data={data} />;
+        }
+        return <EventErrorComponent key={index} data={data} />;
+      })}
     </div>
   );
 }

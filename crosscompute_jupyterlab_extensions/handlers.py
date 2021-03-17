@@ -25,19 +25,26 @@ class PrintsHandler(APIHandler):
         log_id = get_unique_id(LOG_ID_LENGTH, QUEUE_BY_LOG_ID)
         queue = QUEUE_BY_LOG_ID[log_id] = Queue()
 
+        def log(d):
+            queue.put({'status': 'RUNNING', 'data': d})
+
         def work():
             try:
                 automation_definition = load_relevant_path(
                     path, AUTOMATION_FILE_NAME, ['automation'])
                 d = run_automation(
-                    automation_definition, is_mock=False, log=queue.put)
-                queue.put({'payload': {'url': d['url']}})
-            except CrossComputeDefinitionError as e:
-                queue.put({'error': {'type': 'definition', 'data': e.args[0]}})
-            except CrossComputeExecutionError as e:
-                queue.put({'error': {'type': 'execution', 'data': e.args[0]}})
+                    automation_definition, is_mock=False, log=log)
+                queue.put({'status': 'DONE', 'data': {'location': d['url']}})
+                '''
+                except CrossComputeDefinitionError as e:
+                    # queue.put({'error': {'type': 'definition', 'data': e.args[0]}})
+                    queue.put({'status': 'ERROR', 'data': e.args[0]})
+                except CrossComputeExecutionError as e:
+                    # queue.put({'error': {'type': 'execution', 'data': e.args[0]}})
+                    queue.put({'status': 'ERROR', 'data': e.args[0]})
+                '''
             except (Exception, SystemExit) as e:
-                queue.put({'error': {'type': 'system', 'data': e.args[0]}})
+                queue.put({'status': 'ERROR', 'data': e.args[0]})
 
         print('post', QUEUE_BY_LOG_ID)
         executor = ThreadPoolExecutor()
