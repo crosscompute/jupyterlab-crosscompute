@@ -2,9 +2,6 @@ import json
 import tornado
 from concurrent.futures import ThreadPoolExecutor
 from crosscompute.constants import AUTOMATION_FILE_NAME
-from crosscompute.exceptions import (
-    CrossComputeDefinitionError,
-    CrossComputeExecutionError)
 from crosscompute.routines import load_relevant_path, run_automation
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
@@ -35,18 +32,9 @@ class PrintsHandler(APIHandler):
                 d = run_automation(
                     automation_definition, is_mock=False, log=log)
                 queue.put({'status': 'DONE', 'data': {'location': d['url']}})
-                '''
-                except CrossComputeDefinitionError as e:
-                    # queue.put({'error': {'type': 'definition', 'data': e.args[0]}})
-                    queue.put({'status': 'ERROR', 'data': e.args[0]})
-                except CrossComputeExecutionError as e:
-                    # queue.put({'error': {'type': 'execution', 'data': e.args[0]}})
-                    queue.put({'status': 'ERROR', 'data': e.args[0]})
-                '''
             except (Exception, SystemExit) as e:
                 queue.put({'status': 'ERROR', 'data': e.args[0]})
 
-        print('post', QUEUE_BY_LOG_ID)
         executor = ThreadPoolExecutor()
         executor.submit(work)
         self.finish({'id': log_id})
@@ -57,8 +45,6 @@ class LogsHandler(APIHandler):
     @tornado.web.authenticated
     @tornado.gen.coroutine
     def get(self, log_id):
-        print('get', QUEUE_BY_LOG_ID)
-
         self.set_header('content-type', 'text/event-stream')
         self.set_header('cache-control', 'no-cache')
         try:

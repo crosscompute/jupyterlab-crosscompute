@@ -46,10 +46,10 @@ export function EventDoneComponent(props: any): JSX.Element {
   return (
     <div>
       <h1>Done</h1>
-      <p>
-        Please wait for the download prompt or
-        <a href={location}>click here</a>.
-      </p>
+      <a href={location} target="_blank">
+        Please wait for the download prompt or click here
+      </a>
+      .
     </div>
   );
 }
