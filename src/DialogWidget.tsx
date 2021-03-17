@@ -56,7 +56,11 @@ function renderPre(obj: any): JSX.Element[] {
     return (
       <div key={key}>
         <pre>{key}</pre>
-        <pre>{JSON.stringify(obj[key])}</pre>
+        {typeof obj[key] === 'string' ? (
+          <pre>{obj[key]}</pre>
+        ) : (
+          <pre>{JSON.stringify(obj[key])}</pre>
+        )}
       </div>
     );
   });
