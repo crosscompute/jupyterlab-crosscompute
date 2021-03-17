@@ -45,45 +45,21 @@ export function EventDoneComponent(props: any): JSX.Element {
   const { location } = data;
   return (
     <div>
-      Completed
-      <pre>Download link: {location}</pre>
+      <h1>Done</h1>
+      <p>
+        Please wait for the download prompt or
+        <a href={location}>click here</a>.
+      </p>
     </div>
   );
 }
 
-function renderPre(obj: any): JSX.Element[] {
-  return Object.keys(obj).map(key => {
-    return (
-      <div key={key}>
-        <pre>{key}</pre>
-        {typeof obj[key] === 'string' ? (
-          <pre>{obj[key]}</pre>
-        ) : (
-          <pre>{JSON.stringify(obj[key])}</pre>
-        )}
-      </div>
-    );
-  });
-}
-
 export function EventErrorComponent(props: any): JSX.Element {
   const data = props.data;
-
-  if (typeof data === 'string') {
-    return (
-      <div>
-        <pre>{data}</pre>
-      </div>
-    );
-  }
-
   return (
     <div>
-      { /*
-      {data.stderr && <pre>{data.stderr}</pre>}
-      {data.stdout && <pre>{data.stdout}</pre>}
-         */}
-      {renderPre(data)}
+      <h1>Failed</h1>
+      {typeof data === 'string' ? data : renderPre(data)}
     </div>
   );
 }
@@ -92,10 +68,21 @@ export function EventRunningComponent(props: any): JSX.Element {
   const data = props.data;
   return (
     <div>
-      Running... {data.index}/{data.count}
+      <h1>
+        Running... {data.index + 1}/{data.count}
+      </h1>
       {renderPre(data.definition)}
     </div>
   );
+}
+
+function renderPre(obj: any): JSX.Element[] {
+  return Object.entries(obj).map(([key, value]) => (
+    <div key={key}>
+      <h3>{key}</h3>
+      <pre>{typeof value === 'string' ? value : JSON.stringify(value)}</pre>
+    </div>
+  ));
 }
 
 export function LogComponent({ logId }: { logId: string }): JSX.Element {
