@@ -105,7 +105,9 @@ export function DoneArea(props: any): JSX.Element {
     return null;
   }
   const { url, isReady } = data;
-  const style = { backgroundColor: isReady ? 'yellow' : 'inherit' };
+  const style = isReady && {
+    fontWeight: 'bold',
+  };
   return (
     <div>
       <h1>Done</h1>
