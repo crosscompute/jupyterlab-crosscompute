@@ -1,6 +1,5 @@
 import json
 import tornado
-from concurrent.futures import ThreadPoolExecutor
 from crosscompute.constants import AUTOMATION_FILE_NAME
 from crosscompute.routines import load_relevant_path, run_automation
 from notebook.base.handlers import APIHandler
@@ -25,7 +24,7 @@ class PrintsHandler(APIHandler):
 
         def log(d):
             print(d)
-            queue.put({'type': 'UPDATE', 'data': d})
+            queue.put({'type': 'PROGRESS', 'data': d})
 
         def work():
             try:
@@ -34,9 +33,9 @@ class PrintsHandler(APIHandler):
                 d = run_automation(
                     automation_definition, is_mock=False, log=log)
                 print(d)
-                queue.put({'type': 'DOWNLOAD', 'data': {'url': d['url']}})
+                queue.put({'type': 'DONE', 'data': {'url': d['url']}})
             except (Exception, SystemExit) as e:
-                queue.put({'type': 'ALERT', 'data': e.args[0]})
+                queue.put({'type': 'ERROR', 'data': e.args[0]})
 
         self.finish({'id': log_id})
         await IOLoop.current().run_in_executor(None, work)

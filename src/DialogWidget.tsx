@@ -34,41 +34,85 @@ export class LogWidget extends ReactWidget {
 }
 
 interface IPayload {
-  location: string;
+  url: string;
 }
 
 interface IEvent {
-  status: string;
+  type: string;
   data: any;
 }
 
-export function EventDoneComponent(props: any): JSX.Element {
-  const data = props.data as IPayload;
-  const { location } = data;
+export function ProgressArea(props: any): JSX.Element {
+  const { data } = props;
+  if (!data) {
+    return null;
+  }
+  const frames = Object.entries(data.frames || {}).map(
+    ([frameIndex, frameData]: [any, any]) => {
+      const {
+        series: frameSeries,
+        status: frameStatus,
+        name: frameName,
+      } = frameData;
+      let series;
+      if (frameStatus !== 'DONE' && frameSeries !== undefined) {
+        series = Object.entries(frameSeries || {}).map(
+          ([seriesIndex, seriesData]: [any, any]) => {
+            const { status: seriesStatus, name: seriesName } = seriesData;
+            return (
+              <div key={seriesIndex}>
+                [{seriesStatus}] {seriesName}
+              </div>
+            );
+          }
+        );
+      }
+      return (
+        <div key={frameIndex}>
+          <h2>
+            [{frameStatus}] {frameName}
+          </h2>
+          {series}
+        </div>
+      );
+    }
+  );
   return (
     <div>
-      <h1>Done</h1>
-      <a href={location} target='_blank'>
-        Please wait for the download prompt or click here
-      </a>
-      .
+      <h1>Progress</h1>
+      {frames}
     </div>
   );
 }
 
-export function EventErrorComponent(props: any): JSX.Element {
-  const data = props.data;
+export function ErrorArea(props: any): JSX.Element {
+  const { data } = props;
+  if (!data) {
+    return null;
+  }
   return (
     <div>
-      <h1>Failed</h1>
+      <h1>Error</h1>
       {typeof data === 'string' ? data : renderPre(data)}
     </div>
   );
 }
 
-export function EventRunningComponent(props: any): JSX.Element {
-  const data = props.data;
-  return <div>{typeof data === 'string' ? data : renderPre(data)}</div>;
+export function DoneArea(props: any): JSX.Element {
+  const data = props.data as IPayload;
+  if (!data) {
+    return null;
+  }
+  const { url } = data;
+  return (
+    <div>
+      <h1>Done</h1>
+      <a href={url} target="_blank">
+        Please wait for the download prompt
+      </a>
+      .
+    </div>
+  );
 }
 
 function renderPre(obj: any): JSX.Element[] {
@@ -82,20 +126,9 @@ function renderPre(obj: any): JSX.Element[] {
 
 export function LogComponent({ logId }: { logId: string }): JSX.Element {
   const logSourceRef = useRef<any>();
-  const [alertData, setAlertData] = useState();
-  const [downloadUrl, setDownloadUrl] = useState();
-  const [progressTable, setProgressTable] = useState({});
-
-  function downloadData(url: string): void {
-    const pollingIntervalId = setInterval(async () => {
-      const response = await fetch(url, { method: 'HEAD' });
-      const status = response.status;
-      if (status === 200) {
-        clearInterval(pollingIntervalId);
-        window.location.href = url;
-      }
-    }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
-  }
+  const [progressData, setProgressData] = useState({});
+  const [errorData, setErrorData] = useState();
+  const [doneData, setDoneData] = useState();
 
   useEffect(() => {
     const settings = ServerConnection.makeSettings();
@@ -104,60 +137,83 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
     logSourceRef.current.onmessage = function(e: any): void {
       console.log(e);
       const event: IEvent = JSON.parse(e.data) as IEvent;
-      const { status: eventStatus, data: eventData } = event;
-      switch (eventStatus) {
-        case 'UPDATE': {
+      const { type: eventType, data: eventData } = event;
+      switch (eventType) {
+        case 'PROGRESS': {
           const { index, status, name } = eventData;
-          const [ outerIndex, innerIndex ] = index;
-          setProgressTable(function (oldTable: any) {
-          })
-          setProgressTable((oldTable: any) => ({...oldTable, ...{
-            [outerIndex]: { index: innerIndex, status, name },
-          }));
+          const [frameIndex, seriesIndex] = index;
+          setProgressData((oldPanel: any) => {
+            const oldFrames = oldPanel.frames || {};
+            const oldFrame = oldFrames[frameIndex] || {};
+            const newFrame: any = {};
+            if (seriesIndex === undefined) {
+              if (status !== undefined) {
+                newFrame.status = status;
+              }
+              if (name !== undefined) {
+                newFrame.name = name;
+              }
+            } else {
+              const oldSeries = oldFrame.series || {};
+              const oldSerie = oldSeries[seriesIndex] || {};
+              const newSerie: any = {};
+              if (status !== undefined) {
+                newSerie.status = status;
+              }
+              if (name !== undefined) {
+                newSerie.name = name;
+              }
+              newFrame.series = {
+                ...oldSeries,
+                [seriesIndex]: { ...oldSerie, ...newSerie },
+              };
+            }
+            return {
+              ...oldPanel,
+              ...{
+                frames: {
+                  ...oldFrames,
+                  [frameIndex]: { ...oldFrame, ...newFrame },
+                },
+              },
+            };
+          });
+          break;
         }
-        case 'ALERT': {
-          setAlertData(eventData);
+        case 'ERROR': {
+          setErrorData(eventData);
+          break;
         }
-        case 'DOWNLOAD': {
+        case 'DONE': {
+          setDoneData(eventData);
           const { url } = eventData;
-          downloadData(url);
-          setDownloadUrl(url);
+          const pollingIntervalId = setInterval(async () => {
+            const response = await fetch(url, { method: 'HEAD' });
+            const status = response.status;
+            if (status === 200) {
+              clearInterval(pollingIntervalId);
+              window.location.href = url;
+            }
+          }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
           break;
         }
       }
-      event.data
-      setState
-      setEvents((prevState: any) => [eventData, ...prevState]);
     };
 
     return (): void => {
       console.log('closing connection');
       if (logSourceRef.current) {
         logSourceRef.current.close();
+        console.log('connection closed');
       }
     };
   }, []);
 
   return (
-    <div style={{maxHeight: '100%', maxWidth: '100%', overflow: 'auto'}}>
-      {Object.entries(state).map((outerIndex, outerData) => {
-        return (
-        );
-      })}
-
-      {events.length
-        ? events.map((eventData, eventIndex) => {
-            const { status, data } = eventData;
-            switch (status) {
-              case 'RUNNING':
-                return <EventRunningComponent key={eventIndex} data={data} />;
-              case 'ERROR':
-                return <EventErrorComponent key={eventIndex} data={data} />;
-              case 'DONE':
-                return <EventDoneComponent key={eventIndex} data={data} />;
-            }
-          })
-        : 'Your report is being generated. Please be patient.'}
+    <div style={{ maxHeight: '100%', maxWidth: '100%', overflow: 'auto' }}>
+      <ErrorArea data={errorData} />
+      <DoneArea data={doneData} />
+      <ProgressArea data={progressData} />
     </div>
   );
 }
