@@ -34,7 +34,7 @@ class PrintsHandler(APIHandler):
                 d = run_automation(
                     automation_definition, is_mock=False, log=log)
                 print(d)
-                queue.put({'type': 'DOWNLOAD', 'data': {'location': d['url']}})
+                queue.put({'type': 'DOWNLOAD', 'data': {'url': d['url']}})
             except (Exception, SystemExit) as e:
                 queue.put({'type': 'ALERT', 'data': e.args[0]})
 

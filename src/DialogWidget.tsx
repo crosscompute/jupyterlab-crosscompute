@@ -37,7 +37,7 @@ interface IPayload {
   location: string;
 }
 
-interface IEvent{
+interface IEvent {
   status: string;
   data: any;
 }
@@ -48,7 +48,7 @@ export function EventDoneComponent(props: any): JSX.Element {
   return (
     <div>
       <h1>Done</h1>
-      <a href={location} target="_blank">
+      <a href={location} target='_blank'>
         Please wait for the download prompt or click here
       </a>
       .
@@ -68,11 +68,7 @@ export function EventErrorComponent(props: any): JSX.Element {
 
 export function EventRunningComponent(props: any): JSX.Element {
   const data = props.data;
-  return (
-    <div>
-      {typeof data === 'string' ? data : renderPre(data)}
-    </div>
-  );
+  return <div>{typeof data === 'string' ? data : renderPre(data)}</div>;
 }
 
 function renderPre(obj: any): JSX.Element[] {
@@ -86,10 +82,11 @@ function renderPre(obj: any): JSX.Element[] {
 
 export function LogComponent({ logId }: { logId: string }): JSX.Element {
   const logSourceRef = useRef<any>();
-  const [state, setState] = useState({});
+  const [alertData, setAlertData] = useState();
+  const [downloadUrl, setDownloadUrl] = useState();
+  const [progressTable, setProgressTable] = useState({});
 
   function downloadData(url: string): void {
-    console.log(url);
     const pollingIntervalId = setInterval(async () => {
       const response = await fetch(url, { method: 'HEAD' });
       const status = response.status;
@@ -110,15 +107,21 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
       const { status: eventStatus, data: eventData } = event;
       switch (eventStatus) {
         case 'UPDATE': {
-          setEvents((prevState: any) => {
-
-          });
+          const { index, status, name } = eventData;
+          const [ outerIndex, innerIndex ] = index;
+          setProgressTable(function (oldTable: any) {
+          })
+          setProgressTable((oldTable: any) => ({...oldTable, ...{
+            [outerIndex]: { index: innerIndex, status, name },
+          }));
         }
         case 'ALERT': {
-          setState();
+          setAlertData(eventData);
         }
         case 'DOWNLOAD': {
-          downloadData(eventData.location);
+          const { url } = eventData;
+          downloadData(url);
+          setDownloadUrl(url);
           break;
         }
       }
@@ -136,13 +139,12 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
   }, []);
 
   return (
-    <div
-      style={{
-        maxHeight: '100%',
-        maxWidth: '100%',
-        overflow: 'auto',
-      }}
-    >
+    <div style={{maxHeight: '100%', maxWidth: '100%', overflow: 'auto'}}>
+      {Object.entries(state).map((outerIndex, outerData) => {
+        return (
+        );
+      })}
+
       {events.length
         ? events.map((eventData, eventIndex) => {
             const { status, data } = eventData;
