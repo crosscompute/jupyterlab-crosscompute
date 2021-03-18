@@ -105,7 +105,7 @@ export function DoneArea(props: any): JSX.Element {
     return null;
   }
   const { url, isReady } = data;
-  const style = isReady && {
+  const style: any = isReady && {
     fontWeight: 'bold',
   };
   return (
