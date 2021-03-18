@@ -35,6 +35,7 @@ export class LogWidget extends ReactWidget {
 
 interface IPayload {
   url: string;
+  isReady: boolean;
 }
 
 interface IEvent {
@@ -103,12 +104,15 @@ export function DoneArea(props: any): JSX.Element {
   if (!data) {
     return null;
   }
-  const { url } = data;
+  const { url, isReady } = data;
+  const style = { backgroundColor: isReady ? 'yellow' : 'inherit' };
   return (
     <div>
       <h1>Done</h1>
-      <a href={url} target="_blank">
-        Please wait for the download prompt
+      <a href={url} target="_blank" style={style}>
+        {isReady
+          ? 'Click here to download'
+          : 'Please wait for the download prompt'}
       </a>
       .
     </div>
@@ -192,6 +196,7 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
             const status = response.status;
             if (status === 200) {
               clearInterval(pollingIntervalId);
+              setDoneData({...eventData, isReady: true})
               window.location.href = url;
             }
           }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
