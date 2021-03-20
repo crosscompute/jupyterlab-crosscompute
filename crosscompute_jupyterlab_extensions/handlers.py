@@ -23,7 +23,6 @@ class PrintsHandler(APIHandler):
         queue = QUEUE_BY_LOG_ID[log_id] = Queue()
 
         def log(d):
-            print(d)
             queue.put({'type': 'PROGRESS', 'data': d})
 
         def work():
@@ -32,7 +31,6 @@ class PrintsHandler(APIHandler):
                     path, AUTOMATION_FILE_NAME, ['automation'])
                 d = run_automation(
                     automation_definition, is_mock=False, log=log)
-                print(d)
                 queue.put({'type': 'DONE', 'data': {'url': d['url']}})
             except (Exception, SystemExit) as e:
                 queue.put({'type': 'ERROR', 'data': e.args[0]})
