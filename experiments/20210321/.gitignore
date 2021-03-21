@@ -1,0 +1,23 @@
+# jupyterlab
+lib/
+*.tsbuildinfo
+*/labextension/*.tgz
+# node
+node_modules
+# python
+*.egg*
+*.py[co]
+.coverage
+.pytest_cache
+__pycache__
+build/
+dist/
+.tox
+# log
+*.log
+# configuration
+.env*
+# vim
+*.sw[op]
+# system
+.DS_Store
