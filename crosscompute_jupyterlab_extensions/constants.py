@@ -1,0 +1,2 @@
+NAME = 'CrossCompute'
+NAMESPACE = 'crosscompute'

@@ -1,8 +1,6 @@
-# crosscompute_jupyterlab_extensions
+# CrossCompute Extensions for JupyterLab
 
 ![Github Actions Status](https://github.com/crosscompute/crosscompute-jupyterlab-extensions/workflows/Build/badge.svg)
-
-CrossCompute Extensions for JupyterLab
 
 
 This extension is composed of a Python package named `crosscompute_jupyterlab_extensions`
@@ -13,15 +11,17 @@ for the frontend extension.
 ## Requirements
 
 * JupyterLab >= 3.0
+* crosscompute >= 0.8.4.6
 
-## Install
+
+## Installation
 
 ```bash
-pip install crosscompute_jupyterlab_extensions
+pip install crosscompute-jupyterlab-extensions
 ```
 
 
-## Troubleshoot
+## Troubleshooting
 
 If you are seeing the frontend extension, but it is not working, check
 that the server extension is enabled:
@@ -38,9 +38,7 @@ jupyter labextension list
 ```
 
 
-## Contributing
-
-### Development install
+## Development
 
 Note: You will need NodeJS to build the extension package.
 
@@ -76,8 +74,15 @@ By default, the `jlpm run build` command generates the source maps for this exte
 jupyter lab build --minimize=False
 ```
 
-### Uninstall
+## Uninstallation
 
 ```bash
 pip uninstall crosscompute_jupyterlab_extensions
 ```
+
+
+## Acknowledgments
+
+Thank you to [Rodrigo Guarachi](https://github.com/rmguarachi) for creating a custom JupyterLab extension and integration with the CrossCompute framework and platform.
+
+Thank you to [Miguel Angel Gordián](https://github.com/zoek1) for testing our JupyterLab extension in different computational environments.

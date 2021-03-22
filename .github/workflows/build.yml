@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: main
+    branches: master
   pull_request:
     branches: '*'
 
@@ -21,8 +21,7 @@ jobs:
       with:
         python-version: '3.7'
         architecture: 'x64'
-    
-    
+
     - name: Setup pip cache
       uses: actions/cache@v2
       with:
