@@ -80,6 +80,7 @@ class LogsHandler(APIHandler):
         del QUEUE_BY_LOG_ID[log_id]
 
     async def publish(self, data):
+        print(data)
         self.write('data: {}\n\n'.format(data))
         await self.flush()
 
