@@ -14,7 +14,7 @@ export function LogDialogWidget(logId: string | null): any {
     title: NAME + ' Automation',
     body: new LogWidget(logId),
     host: document.body,
-    buttons: [Dialog.okButton({ label: 'Cancel' })]
+    buttons: [Dialog.okButton({ label: 'Close' })]
   });
   dialog.launch().catch(() => null);
   return dialog;
@@ -188,6 +188,7 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
         }
         case 'ERROR': {
           setErrorData(eventData);
+          logSourceRef.current.close();
           break;
         }
         case 'DONE': {
@@ -202,6 +203,7 @@ export function LogComponent({ logId }: { logId: string }): JSX.Element {
               window.location.href = url;
             }
           }, RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS);
+          logSourceRef.current.close();
           break;
         }
       }
