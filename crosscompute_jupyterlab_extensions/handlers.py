@@ -47,7 +47,7 @@ class PrintsHandler(APIHandler):
                     automation_definition, is_mock=False, log=log)
                 url = d['url']
                 # TODO: Consider downloading URL to ~/Downloads/TIMESTAMP.zip
-                queue.put({'type': 'DONE', 'data': {'url': url})
+                queue.put({'type': 'DONE', 'data': {'url': url}})
             except (Exception, SystemExit) as e:
                 queue.put({'type': 'ERROR', 'data': e.args[0]})
 
