@@ -20,6 +20,15 @@ for the frontend extension.
 pip install crosscompute-jupyterlab-extensions
 ```
 
+## Usage
+
+You will need to configure CROSSCOMPUTE_TOKEN in your environment to use the printer service. You can find your token on https://crosscompute.com.
+
+```bash
+export CROSSCOMPUTE_TOKEN
+jupyter lab
+```
+
 
 ## Troubleshooting
 
@@ -86,3 +95,5 @@ pip uninstall crosscompute_jupyterlab_extensions
 Thank you to [Rodrigo Guarachi](https://github.com/rmguarachi) for creating a custom JupyterLab extension and integration with the CrossCompute framework and platform.
 
 Thank you to [Miguel Angel Gordián](https://github.com/zoek1) for testing our JupyterLab extension in different computational environments.
+
+Thank you to Ji Yoon Lee and Tyler Doyle for user experience feedback.
