@@ -5,7 +5,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { ErrorDialogWidget } from './ErrorDialogWidget'
+import { ErrorDialogWidget } from './ErrorDialogWidget';
 import { LogDialogWidget } from './LogDialogWidget';
 import RunAutomationButton from './RunAutomationButton';
 import { COMMAND_PALETTE_CATEGORY, RUN_AUTOMATION_COMMAND } from './constants';
