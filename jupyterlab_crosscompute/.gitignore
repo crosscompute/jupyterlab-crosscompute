@@ -1,3 +1,7 @@
+# vim
+*.sw[op]
+*~
+
 *.bundle.*
 lib/
 node_modules/

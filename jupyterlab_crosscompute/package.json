@@ -80,7 +80,7 @@
             "pip"
           ],
           "base": {
-            "name": "jupyterlab_crosscompute"
+            "name": "jupyterlab-crosscompute"
           }
         }
     },
