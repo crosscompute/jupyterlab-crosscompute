@@ -1,6 +1,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
-
 import { ServerConnection } from '@jupyterlab/services';
+
+import { NAMESPACE } from './constant';
 
 /**
  * Call the API extension
@@ -15,11 +16,7 @@ export async function requestAPI<T>(
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
-  const requestUrl = URLExt.join(
-    settings.baseUrl,
-    'jupyterlab-crosscompute', // API Namespace
-    endPoint
-  );
+  const requestUrl = URLExt.join(settings.baseUrl, NAMESPACE, endPoint);
 
   let response: Response;
   try {
