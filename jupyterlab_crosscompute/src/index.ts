@@ -4,6 +4,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
@@ -24,10 +25,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
   requires: [ITranslator],
-  optional: [ICommandPalette, ISettingRegistry, ILayoutRestorer],
+  optional: [
+    IFileBrowserFactory,
+    ICommandPalette,
+    ISettingRegistry,
+    ILayoutRestorer
+  ],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    browserFactory: IFileBrowserFactory | null,
     palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null,
     restorer: ILayoutRestorer | null
@@ -39,7 +46,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
         console.log(START_LAUNCH_COMMAND);
-        requestAPI<any>('get_example')
+        const browserPath = browserFactory?.defaultBrowser.model.path || '';
+        // TODO: Consider using json
+        const formData = new FormData();
+        formData.append('path', browserPath);
+        requestAPI<any>('launch', {
+          method: 'POST',
+          body: formData
+        })
           .then(data => {
             console.log(data);
           })

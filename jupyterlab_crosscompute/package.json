@@ -47,10 +47,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.1.0",
-    "@jupyterlab/settingregistry": "^3.1.0",
     "@jupyterlab/coreutils": "^5.1.0",
-    "@jupyterlab/services": "^6.1.0"
-
+    "@jupyterlab/filebrowser": "^3.2.8",
+    "@jupyterlab/services": "^6.1.0",
+    "@jupyterlab/settingregistry": "^3.1.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.1.0",
@@ -73,16 +73,16 @@
   "publishConfig": {
     "access": "public"
   },
-  "jupyterlab": { 
+  "jupyterlab": {
     "discovery": {
-        "server": {
-          "managers": [
-            "pip"
-          ],
-          "base": {
-            "name": "jupyterlab-crosscompute"
-          }
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "jupyterlab-crosscompute"
         }
+      }
     },
     "extension": true,
     "outputDir": "jupyterlab_crosscompute/labextension",
