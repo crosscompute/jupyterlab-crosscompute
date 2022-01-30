@@ -52,8 +52,15 @@ export class MainPanel extends Widget {
     automationRenderSwitch.label = trans.__('Render');
     automationDeploySwitch.label = trans.__('Deploy');
 
+    // TODO: See if we can add the div directly without widget
+    const automationLaunchLogDiv = document.createElement('div');
+    automationLaunchLogDiv.id = 'crosscompute-launch-log';
+    const automationLaunchLog = new Widget();
+    automationLaunchLog.node.append(automationLaunchLogDiv);
+
     const layout = new PanelLayout();
     layout.addWidget(automationLaunchSwitch);
+    layout.addWidget(automationLaunchLog);
     layout.addWidget(automationRenderSwitch);
     layout.addWidget(automationDeploySwitch);
     this.layout = layout;

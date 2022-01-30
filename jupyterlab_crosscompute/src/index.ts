@@ -54,8 +54,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
           method: 'POST',
           body: formData
         })
-          .then(data => {
-            console.log(data);
+          .then(d => {
+            console.log(d);
+            const x = document.getElementById('crosscompute-launch-log');
+            if (x) {
+              x.innerHTML = '<a href="' + window.location.hostname + ':7000">' + window.location.hostname + ':7000</a>';
+            }
           })
           .catch(reason => {
             console.error(reason);
