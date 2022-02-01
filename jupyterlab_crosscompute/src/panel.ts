@@ -8,12 +8,12 @@ import {
   MAIN_PANEL_CAPTION,
   MAIN_PANEL_CLASSNAME,
   MAIN_PANEL_ID,
-  START_DEPLOY_COMMAND,
+  // START_DEPLOY_COMMAND,
   START_LAUNCH_COMMAND,
-  START_RENDER_COMMAND,
-  STOP_DEPLOY_COMMAND,
+  // START_RENDER_COMMAND,
+  // STOP_DEPLOY_COMMAND,
   STOP_LAUNCH_COMMAND,
-  STOP_RENDER_COMMAND
+  // STOP_RENDER_COMMAND
 } from './constant';
 
 export class MainPanel extends Widget {
@@ -31,13 +31,14 @@ export class MainPanel extends Widget {
     const trans = translator.load('jupyterlab');
 
     const automationLaunchSwitch = new Switch();
-    const automationRenderSwitch = new Switch();
-    const automationDeploySwitch = new Switch();
+    // const automationRenderSwitch = new Switch();
+    // const automationDeploySwitch = new Switch();
     automationLaunchSwitch.valueChanged.connect((_, args) => {
       commands.execute(
         args.newValue ? START_LAUNCH_COMMAND : STOP_LAUNCH_COMMAND
       );
     });
+    /*
     automationRenderSwitch.valueChanged.connect((_, args) => {
       commands.execute(
         args.newValue ? START_RENDER_COMMAND : STOP_RENDER_COMMAND
@@ -48,9 +49,10 @@ export class MainPanel extends Widget {
         args.newValue ? START_DEPLOY_COMMAND : STOP_DEPLOY_COMMAND
       );
     });
+    */
     automationLaunchSwitch.label = trans.__('Launch');
-    automationRenderSwitch.label = trans.__('Render');
-    automationDeploySwitch.label = trans.__('Deploy');
+    // automationRenderSwitch.label = trans.__('Render');
+    // automationDeploySwitch.label = trans.__('Deploy');
 
     // TODO: See if we can add the div directly without widget
     const automationLaunchLogDiv = document.createElement('div');
@@ -61,8 +63,8 @@ export class MainPanel extends Widget {
     const layout = new PanelLayout();
     layout.addWidget(automationLaunchSwitch);
     layout.addWidget(automationLaunchLog);
-    layout.addWidget(automationRenderSwitch);
-    layout.addWidget(automationDeploySwitch);
+    // layout.addWidget(automationRenderSwitch);
+    // layout.addWidget(automationDeploySwitch);
     this.layout = layout;
   }
 }

@@ -5,18 +5,18 @@ import {
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+// import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
 import {
   COMMAND_PALETTE_CATEGORY,
   MAIN_PANEL_ID,
-  START_DEPLOY_COMMAND,
+  // START_DEPLOY_COMMAND,
   START_LAUNCH_COMMAND,
-  START_RENDER_COMMAND,
-  STOP_DEPLOY_COMMAND,
-  STOP_LAUNCH_COMMAND,
-  STOP_RENDER_COMMAND
+  // START_RENDER_COMMAND,
+  // STOP_DEPLOY_COMMAND,
+  STOP_LAUNCH_COMMAND
+  // STOP_RENDER_COMMAND,
 } from './constant';
 import { requestAPI } from './handler';
 import { MainPanel } from './panel';
@@ -28,7 +28,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   optional: [
     IFileBrowserFactory,
     ICommandPalette,
-    ISettingRegistry,
+    // ISettingRegistry,
     ILayoutRestorer
   ],
   activate: (
@@ -36,7 +36,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     browserFactory: IFileBrowserFactory | null,
     palette: ICommandPalette | null,
-    settingRegistry: ISettingRegistry | null,
+    // settingRegistry: ISettingRegistry | null,
     restorer: ILayoutRestorer | null
   ) => {
     const { commands, shell } = app;
@@ -56,9 +56,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
         })
           .then(d => {
             console.log(d);
+            const uri = d.uri;
             const x = document.getElementById('crosscompute-launch-log');
             if (x) {
-              x.innerHTML = '<a href="' + window.location.hostname + ':7000">' + window.location.hostname + ':7000</a>';
+              x.innerHTML = `<a href="${uri}" target="_blank">${uri}</a>`;
             }
           })
           .catch(reason => {
@@ -72,6 +73,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         console.log(STOP_LAUNCH_COMMAND);
       }
     });
+    /*
     commands.addCommand(START_RENDER_COMMAND, {
       label: trans.__('Start Render Automation'),
       execute: (args: any) => {
@@ -96,6 +98,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         console.log(STOP_DEPLOY_COMMAND);
       }
     });
+    */
 
     const mainPanel = new MainPanel({ commands, translator });
     shell.add(mainPanel, 'right', { rank: 1000 });
@@ -109,6 +112,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         command: STOP_LAUNCH_COMMAND,
         category: COMMAND_PALETTE_CATEGORY
       });
+      /*
       palette.addItem({
         command: START_RENDER_COMMAND,
         category: COMMAND_PALETTE_CATEGORY
@@ -125,8 +129,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
         command: STOP_DEPLOY_COMMAND,
         category: COMMAND_PALETTE_CATEGORY
       });
+      */
     }
 
+    /*
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
@@ -137,6 +143,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           // console.error(reason);
         });
     }
+    */
 
     if (restorer) {
       restorer.add(mainPanel, MAIN_PANEL_ID);

@@ -1,31 +1,28 @@
 import json
 import subprocess
 import tornado
-from crosscompute.scripts.launch import do as launch
-from multiprocessing import Process
 
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 
 from .constants import NAMESPACE
+from .macros import find_open_port
 
 
 class RouteHandler(APIHandler):
 
     @tornado.web.authenticated
     def post(self):
+        settings = self.settings
+        host = settings['serverapp'].ip
+        port = find_open_port()
         path = self.get_argument('path')
-
-        def start():
-            # TODO: Make host depend on jupyterlab ip
-            # TODO: Consider whether to auto find available port
-            subprocess.run(['pkill', 'crosscompute'])
-            launch(['--host', '0.0.0.0', path])
-
-        p = Process(target=start)
-        p.start()
+        PROCESS_BY_PATH[path] = subprocess.Popen([
+            'crosscompute', '--host', host, '--port', str(port), path])
+        # TODO: Use proxy to get uri if a proxy is available
+        uri = f'{self.request.protocol}://{self.request.host_name}:{port}'
         self.finish(json.dumps({
-            'uri': 'http://127.0.0.1:7000',
+            'uri': uri,
         }))
 
 
@@ -35,3 +32,6 @@ def setup_handlers(web_app):
     web_app.add_handlers(host_pattern, [
         (url_path_join(base_url, NAMESPACE, 'launch'), RouteHandler),
     ])
+
+
+PROCESS_BY_PATH = {}
