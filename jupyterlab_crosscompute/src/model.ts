@@ -14,7 +14,9 @@ export class AutomationModel {
     return this._changed;
   }
 
-  private _configuration: AutomationConfiguration = new AutomationConfiguration('');
+  private _configuration: AutomationConfiguration = new AutomationConfiguration(
+    ''
+  );
   private _changed = new Signal<this, void>(this);
 }
 

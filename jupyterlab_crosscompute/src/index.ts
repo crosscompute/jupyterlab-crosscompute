@@ -10,7 +10,6 @@ import { ITranslator } from '@jupyterlab/translation';
 
 import {
   COMMAND_PALETTE_CATEGORY,
-  // MAIN_PANEL_ID,
   // START_DEPLOY_COMMAND,
   START_LAUNCH_COMMAND,
   // START_RENDER_COMMAND,
@@ -106,7 +105,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const automationBody = new AutomationBody(automationModel);
     browser.model.pathChanged.connect((sender, args) => {
       automationModel.configuration = new AutomationConfiguration(
-        args.newValue);
+        args.newValue
+      );
     });
     shell.add(automationBody, 'right', { rank: 1000 });
 
@@ -153,7 +153,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     */
 
     if (restorer) {
-      // restorer.add(mainPanel, MAIN_PANEL_ID);
+      restorer.add(automationBody, automationBody.id);
     }
   }
 };

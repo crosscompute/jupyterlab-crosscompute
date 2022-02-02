@@ -1,5 +1,5 @@
-import { ReactWidget } from '@jupyterlab/apputils';
-import React, { useEffect, useState } from 'react';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import React from 'react';
 
 import { logoIcon } from './constant';
 import { AutomationModel } from './model';
@@ -18,7 +18,11 @@ export class AutomationBody extends ReactWidget {
   }
 
   render(): JSX.Element {
-    return <AutomationComponent model={this._model} />;
+    return (
+      <UseSignal signal={this._model.changed} initialSender={this._model}>
+        {(): JSX.Element => <AutomationComponent model={this._model} />}
+      </UseSignal>
+    );
   }
 
   private _model: AutomationModel;
@@ -29,21 +33,10 @@ const AutomationComponent = ({
 }: {
   model: AutomationModel;
 }): JSX.Element => {
-  const [configuration, setConfiguration] = useState({
-    name: model.configuration.name
-  });
-
-  useEffect(() => {
-    const updateConfiguration = (model: AutomationModel): void => {
-      setConfiguration(model.configuration);
-    };
-
-    model.changed.connect(updateConfiguration);
-
-    return (): void => {
-      model.changed.disconnect(updateConfiguration);
-    };
-  });
-
-  return <>Welcome! {configuration.name}</>;
+  const { configuration } = model;
+  const { name } = configuration;
+  if (!name) {
+    return <h1>Hey</h1>;
+  }
+  return <h1>Welcome! {name}</h1>;
 };
