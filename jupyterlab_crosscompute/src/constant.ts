@@ -1,10 +1,6 @@
 import { LabIcon } from '@jupyterlab/ui-components';
 import logoSvgstr from '../style/icons/Logo-SmallFormat-20220127.svg';
 
-export const MAIN_PANEL_ID = 'crosscompute-main-panel';
-export const MAIN_PANEL_CLASSNAME = 'crosscompute-MainPanel';
-export const MAIN_PANEL_CAPTION = 'CrossCompute';
-
 export const START_LAUNCH_COMMAND = 'crosscompute:launch:start';
 export const STOP_LAUNCH_COMMAND = 'crosscompute:launch:stop';
 export const START_RENDER_COMMAND = 'crosscompute:render:start';

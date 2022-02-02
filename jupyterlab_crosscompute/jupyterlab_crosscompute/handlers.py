@@ -1,6 +1,9 @@
 import json
-import subprocess
 import tornado
+from crosscompute.exceptions import CrossComputeError
+from crosscompute.routines.automation import Automation
+from crosscompute.scripts.serve import serve
+from multiprocessing import Process
 
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
@@ -17,8 +20,20 @@ class RouteHandler(APIHandler):
         host = settings['serverapp'].ip
         port = find_open_port()
         path = self.get_argument('path')
-        PROCESS_BY_PATH[path] = subprocess.Popen([
-            'crosscompute', '--host', host, '--port', str(port), path])
+        try:
+            automation = Automation.load(path)
+        except CrossComputeError as e:
+            self.set_status(422)
+            return self.finish(json.dumps({'message': str(e)}))
+
+        server_process = Process(target=serve, args=(
+            automation, host, port), kwargs={'with_browser': False},
+            daemon=True)
+        processes = [server_process]
+        for process in processes:
+            process.start()
+        PROCESSES_BY_PATH[path] = processes
+
         # TODO: Use proxy to get uri if a proxy is available
         uri = f'{self.request.protocol}://{self.request.host_name}:{port}'
         self.finish(json.dumps({
@@ -34,4 +49,4 @@ def setup_handlers(web_app):
     ])
 
 
-PROCESS_BY_PATH = {}
+PROCESSES_BY_PATH = {}

@@ -10,7 +10,7 @@ import { ITranslator } from '@jupyterlab/translation';
 
 import {
   COMMAND_PALETTE_CATEGORY,
-  MAIN_PANEL_ID,
+  // MAIN_PANEL_ID,
   // START_DEPLOY_COMMAND,
   START_LAUNCH_COMMAND,
   // START_RENDER_COMMAND,
@@ -19,35 +19,34 @@ import {
   // STOP_RENDER_COMMAND,
 } from './constant';
 import { requestAPI } from './handler';
-import { MainPanel } from './panel';
+import { AutomationBody } from './body';
+import { AutomationConfiguration, AutomationModel } from './model';
 
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  requires: [ITranslator],
+  requires: [IFileBrowserFactory, ITranslator],
   optional: [
-    IFileBrowserFactory,
     ICommandPalette,
     // ISettingRegistry,
     ILayoutRestorer
   ],
   activate: (
     app: JupyterFrontEnd,
+    browserFactory: IFileBrowserFactory,
     translator: ITranslator,
-    browserFactory: IFileBrowserFactory | null,
-    palette: ICommandPalette | null,
-    // settingRegistry: ISettingRegistry | null,
-    restorer: ILayoutRestorer | null
+    palette?: ICommandPalette,
+    // settingRegistry?: ISettingRegistry,
+    restorer?: ILayoutRestorer
   ) => {
     const { commands, shell } = app;
+    const browser = browserFactory.defaultBrowser;
     const trans = translator.load('jupyterlab');
 
     commands.addCommand(START_LAUNCH_COMMAND, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
-        console.log(START_LAUNCH_COMMAND);
-        const browserPath = browserFactory?.defaultBrowser.model.path || '';
-        // TODO: Consider using json
+        const browserPath = browser.model.path || '';
         const formData = new FormData();
         formData.append('path', browserPath);
         requestAPI<any>('launch', {
@@ -56,14 +55,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
         })
           .then(d => {
             console.log(d);
+            /*
             const uri = d.uri;
             const x = document.getElementById('crosscompute-launch-log');
             if (x) {
               x.innerHTML = `<a href="${uri}" target="_blank">${uri}</a>`;
             }
+            */
           })
-          .catch(reason => {
-            console.error(reason);
+          .catch(d => {
+            console.error(d);
+            console.log(d.message);
           });
       }
     });
@@ -100,8 +102,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
     });
     */
 
-    const mainPanel = new MainPanel({ commands, translator });
-    shell.add(mainPanel, 'right', { rank: 1000 });
+    const automationModel = new AutomationModel();
+    const automationBody = new AutomationBody(automationModel);
+    browser.model.pathChanged.connect((sender, args) => {
+      automationModel.configuration = new AutomationConfiguration(
+        args.newValue);
+    });
+    shell.add(automationBody, 'right', { rank: 1000 });
 
     if (palette) {
       palette.addItem({
@@ -146,7 +153,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     */
 
     if (restorer) {
-      restorer.add(mainPanel, MAIN_PANEL_ID);
+      // restorer.add(mainPanel, MAIN_PANEL_ID);
     }
   }
 };
