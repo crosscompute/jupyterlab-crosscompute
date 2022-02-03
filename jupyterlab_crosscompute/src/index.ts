@@ -1,9 +1,11 @@
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 // import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -24,7 +26,7 @@ import { AutomationConfiguration, AutomationModel } from './model';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  requires: [IFileBrowserFactory, ITranslator],
+  requires: [IFileBrowserFactory, ILabShell, IDocumentManager, ITranslator],
   optional: [
     ICommandPalette,
     // ISettingRegistry,
@@ -33,6 +35,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
+    labShell: ILabShell,
+    docManager: IDocumentManager,
     translator: ITranslator,
     palette?: ICommandPalette,
     // settingRegistry?: ISettingRegistry,
@@ -45,7 +49,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(START_LAUNCH_COMMAND, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
-        const browserPath = browser.model.path || '';
+        const browserPath = browser.model.path;
         const formData = new FormData();
         formData.append('path', browserPath);
         requestAPI<any>('launch', {
@@ -54,13 +58,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
         })
           .then(d => {
             console.log(d);
-            /*
-            const uri = d.uri;
-            const x = document.getElementById('crosscompute-launch-log');
-            if (x) {
-              x.innerHTML = `<a href="${uri}" target="_blank">${uri}</a>`;
-            }
-            */
           })
           .catch(d => {
             console.error(d);
@@ -102,11 +99,50 @@ const plugin: JupyterFrontEndPlugin<void> = {
     */
 
     const automationModel = new AutomationModel();
-    const automationBody = new AutomationBody(automationModel);
+    const automationBody = new AutomationBody(automationModel, docManager);
+    labShell.layoutModified.connect(automationBody.onUpdate);
+    labShell.layoutModified.connect((sender, args) => {
+      console.log(sender, args);
+      if (!automationBody.isHidden && automationModel.isDirty) {
+        console.log('not hidden and layout changed render');
+        const { path } = browser.model;
+        requestAPI<any>('launch?folder=' + path)
+          .then(d => {
+            automationModel.configuration = new AutomationConfiguration(
+              d.path,
+              d.name,
+              d.version
+            );
+          })
+          .catch(d => {
+            console.error(d);
+            console.log(d.message);
+          });
+        automationModel.isDirty = false;
+      }
+    });
     browser.model.pathChanged.connect((sender, args) => {
-      automationModel.configuration = new AutomationConfiguration(
-        args.newValue
-      );
+      console.log(sender, args);
+      if (automationBody.isHidden) {
+        console.log('hidden and setting dirty');
+        automationModel.isDirty = true;
+      } else {
+        console.log('not hidden and path changed render');
+        const { path } = browser.model;
+        console.log(path, args.newValue);
+        requestAPI<any>('launch?folder=' + args.newValue)
+          .then(d => {
+            automationModel.configuration = new AutomationConfiguration(
+              d.path,
+              d.name,
+              d.version
+            );
+          })
+          .catch(d => {
+            console.error(d);
+            console.log(d.message);
+          });
+      }
     });
     shell.add(automationBody, 'right', { rank: 1000 });
 

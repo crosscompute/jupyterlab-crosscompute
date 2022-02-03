@@ -15,6 +15,21 @@ from .macros import find_open_port
 class RouteHandler(APIHandler):
 
     @tornado.web.authenticated
+    def get(self):
+        folder = self.get_argument('folder')
+        try:
+            automation = Automation.load(folder)
+        except CrossComputeError as e:
+            self.set_status(422)
+            return self.finish(json.dumps({'message': str(e)}))
+        configuration = automation.configuration
+        return self.finish(json.dumps({
+            'name': configuration.get('name', ''),
+            'version': configuration.get('version', ''),
+            'path': automation.path,
+        }))
+
+    @tornado.web.authenticated
     def post(self):
         settings = self.settings
         host = settings['serverapp'].ip

@@ -14,16 +14,20 @@ export class AutomationModel {
     return this._changed;
   }
 
-  private _configuration: AutomationConfiguration = new AutomationConfiguration(
-    ''
-  );
+  public isDirty = false;
+  private _configuration: AutomationConfiguration =
+    new AutomationConfiguration();
   private _changed = new Signal<this, void>(this);
 }
 
 export class AutomationConfiguration {
-  constructor(name: string) {
+  constructor(path = '', name = '', version = '') {
+    this.path = path;
     this.name = name;
+    this.version = version;
   }
 
+  path: string;
   name: string;
+  version: string;
 }

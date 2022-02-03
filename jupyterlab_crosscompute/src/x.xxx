@@ -49,13 +49,6 @@ export class MainPanel extends Widget {
 
     const automationInformation = new Widget();
 
-    const layout = new PanelLayout();
-    layout.addWidget(automationInformation);
-    layout.addWidget(automationLaunchSwitch);
-    // layout.addWidget(automationRenderSwitch);
-    // layout.addWidget(automationDeploySwitch);
-    this.layout = layout;
-
     if (browser) {
       browser.model.pathChanged.connect((sender, args) => {
         automationInformation.node.innerHTML = args.newValue;
@@ -68,8 +61,6 @@ export class MainPanel extends Widget {
     }
   }
 }
-
-class AutomationInformation extends ReactWidget {
 
 namespace MainPanel {
   export interface IOptions {
