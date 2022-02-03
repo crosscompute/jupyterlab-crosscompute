@@ -11,7 +11,7 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ITranslator } from '@jupyterlab/translation';
 
 import {
-  COMMAND_PALETTE_CATEGORY,
+  COMMAND_CATEGORY,
   // START_DEPLOY_COMMAND,
   START_LAUNCH_COMMAND,
   // START_RENDER_COMMAND,
@@ -21,7 +21,7 @@ import {
 } from './constant';
 import { requestAPI } from './handler';
 import { AutomationBody } from './body';
-import { AutomationConfiguration, AutomationModel } from './model';
+import { AutomationModel } from './model';
 
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
@@ -49,9 +49,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(START_LAUNCH_COMMAND, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
-        const browserPath = browser.model.path;
         const formData = new FormData();
-        formData.append('path', browserPath);
+        formData.append('path', browser.model.path);
         requestAPI<any>('launch', {
           method: 'POST',
           body: formData
@@ -99,78 +98,36 @@ const plugin: JupyterFrontEndPlugin<void> = {
     */
 
     const automationModel = new AutomationModel();
-    const automationBody = new AutomationBody(automationModel, docManager);
-    labShell.layoutModified.connect(automationBody.onUpdate);
-    labShell.layoutModified.connect((sender, args) => {
-      console.log(sender, args);
-      if (!automationBody.isHidden && automationModel.isDirty) {
-        console.log('not hidden and layout changed render');
-        const { path } = browser.model;
-        requestAPI<any>('launch?folder=' + path)
-          .then(d => {
-            automationModel.configuration = new AutomationConfiguration(
-              d.path,
-              d.name,
-              d.version
-            );
-          })
-          .catch(d => {
-            console.error(d);
-            console.log(d.message);
-          });
-        automationModel.isDirty = false;
-      }
-    });
-    browser.model.pathChanged.connect((sender, args) => {
-      console.log(sender, args);
-      if (automationBody.isHidden) {
-        console.log('hidden and setting dirty');
-        automationModel.isDirty = true;
-      } else {
-        console.log('not hidden and path changed render');
-        const { path } = browser.model;
-        console.log(path, args.newValue);
-        requestAPI<any>('launch?folder=' + args.newValue)
-          .then(d => {
-            automationModel.configuration = new AutomationConfiguration(
-              d.path,
-              d.name,
-              d.version
-            );
-          })
-          .catch(d => {
-            console.error(d);
-            console.log(d.message);
-          });
-      }
-    });
+    const automationBody = new AutomationBody(
+      automationModel,
+      browserFactory,
+      docManager
+    );
+    labShell.layoutModified.connect(() => automationBody.onUpdate());
+    browser.model.pathChanged.connect(() => automationBody.onUpdate(true));
     shell.add(automationBody, 'right', { rank: 1000 });
 
     if (palette) {
       palette.addItem({
         command: START_LAUNCH_COMMAND,
-        category: COMMAND_PALETTE_CATEGORY
+        category: COMMAND_CATEGORY
       });
       palette.addItem({
         command: STOP_LAUNCH_COMMAND,
-        category: COMMAND_PALETTE_CATEGORY
+        category: COMMAND_CATEGORY
       });
       /*
       palette.addItem({
-        command: START_RENDER_COMMAND,
-        category: COMMAND_PALETTE_CATEGORY
+        command: START_RENDER_COMMAND, category: COMMAND_CATEGORY
       });
       palette.addItem({
-        command: STOP_RENDER_COMMAND,
-        category: COMMAND_PALETTE_CATEGORY
+        command: STOP_RENDER_COMMAND, category: COMMAND_CATEGORY
       });
       palette.addItem({
-        command: START_DEPLOY_COMMAND,
-        category: COMMAND_PALETTE_CATEGORY
+        command: START_DEPLOY_COMMAND, category: COMMAND_CATEGORY
       });
       palette.addItem({
-        command: STOP_DEPLOY_COMMAND,
-        category: COMMAND_PALETTE_CATEGORY
+        command: STOP_DEPLOY_COMMAND, category: COMMAND_CATEGORY
       });
       */
     }

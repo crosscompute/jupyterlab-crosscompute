@@ -8,7 +8,7 @@ export const STOP_LAUNCH_COMMAND = 'crosscompute:launch:stop';
 // export const START_DEPLOY_COMMAND = 'crosscompute:deploy:start';
 // export const STOP_DEPLOY_COMMAND = 'crosscompute:deploy:stop';
 
-export const COMMAND_PALETTE_CATEGORY = 'CrossCompute';
+export const COMMAND_CATEGORY = 'CrossCompute';
 
 export const logoIcon = new LabIcon({
   name: 'crosscompute:logo',

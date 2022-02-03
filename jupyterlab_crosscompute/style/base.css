@@ -17,5 +17,9 @@
 
 .crosscompute-AutomationEdit {
   color: blue;
+}
+
+.crosscompute-AutomationEdit:hover {
+  color: blue;
   text-decoration: underline;
 }
