@@ -27,12 +27,16 @@ export class AutomationBody extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const openPath = (path: string) => this._docManager.openOrReveal(path);
+    const openFolder = (folder: string) =>
+      this._browserFactory.defaultBrowser.model.cd(folder);
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
         {() => (
           <AutomationComponent
             model={this._model}
-            docManager={this._docManager}
+            openPath={openPath}
+            openFolder={openFolder}
           />
         )}
       </UseSignal>
@@ -73,10 +77,12 @@ export class AutomationBody extends ReactWidget {
 
 const AutomationComponent = ({
   model,
-  docManager
+  openPath,
+  openFolder
 }: {
   model: AutomationModel;
-  docManager: IDocumentManager;
+  openPath: (path: string) => void;
+  openFolder: (folder: string) => void;
 }): JSX.Element => {
   const { configuration, error } = model;
   const { path, folder, name, version, batches } = configuration;
@@ -89,15 +95,20 @@ const AutomationComponent = ({
     content = message;
   } else {
     const batchLinks = batches.map((d, i) => (
-      <a
-        className="crosscompute-BatchesLink crosscompute-Link"
-        onClick={() =>
-          docManager.openOrReveal(folder + '/' + d.configuration.path)
-        }
-        key={i}
-      >
-        Batches Configuration
-      </a>
+      <li key={i}>
+        <a
+          className="crosscompute-Link"
+          onClick={() => {
+            if (d.configuration) {
+              openPath(folder + '/' + d.configuration.path);
+            } else {
+              openFolder(d.folder);
+            }
+          }}
+        >
+          {d.name || d.folder}
+        </a>
+      </li>
     ));
     content = (
       <div className="crosscompute-AutomationInformation">
@@ -107,14 +118,16 @@ const AutomationComponent = ({
         </div>
         <div className="crosscompute-AutomationInformationBody">
           <div>
-            <a
-              className="crosscompute-ConfigurationLink crosscompute-Link"
-              onClick={() => docManager.openOrReveal(path)}
-            >
+            <a className="crosscompute-Link" onClick={() => openPath(path)}>
               Automation Configuration
             </a>
           </div>
-          {batchLinks.length > 0 && <div>{batchLinks}</div>}
+          {batchLinks.length > 0 && (
+            <div className="crosscompute-BatchDefinitions">
+              Batch Definitions
+              <ul>{batchLinks}</ul>
+            </div>
+          )}
           <button>Launch</button>
         </div>
       </div>

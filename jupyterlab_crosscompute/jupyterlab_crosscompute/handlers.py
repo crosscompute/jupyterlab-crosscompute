@@ -32,7 +32,7 @@ class RouteHandler(APIHandler):
         configuration_path = automation.path
         configuration = automation.configuration
         # TODO: Define a function to generate this JSON
-        d = {
+        automation_dictionary = {
             'path': configuration_path,
             'folder': dirname(configuration_path),
             'name': configuration.get('name', ''),
@@ -40,14 +40,18 @@ class RouteHandler(APIHandler):
         }
         if 'batches' in configuration:
             batch_definitions = []
-            for batch_definition in configuration['batches']:
-                batch_configuration = batch_definition.get('configuration', {})
-                if 'path' not in batch_configuration:
-                    continue
-                batch_definitions.append({'configuration': {
-                    'path': batch_configuration['path']}})
-            d['batches'] = batch_definitions
-        return self.finish(json.dumps(d))
+            for batch_dictionary in configuration['batches']:
+                batch_definition = {
+                    'name': batch_dictionary.get('name', ''),
+                    'folder': batch_dictionary['folder'],
+                }
+                batch_configuration = batch_dictionary.get('configuration', {})
+                if 'path' in batch_configuration:
+                    batch_definition['configuration'] = {
+                        'path': batch_configuration['path']}
+                batch_definitions.append(batch_definition)
+            automation_dictionary['batches'] = batch_definitions
+        return self.finish(json.dumps(automation_dictionary))
 
     @tornado.web.authenticated
     def post(self):

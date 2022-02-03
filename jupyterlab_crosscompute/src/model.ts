@@ -55,5 +55,7 @@ export class AutomationConfiguration {
 }
 
 interface IBatchDefinition {
+  name: string;
+  folder: string;
   configuration: { path: string };
 }
