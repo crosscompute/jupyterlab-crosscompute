@@ -3,7 +3,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import React from 'react';
 
-import { logoIcon } from './constant';
+import { ErrorCode, logoIcon } from './constant';
 import { requestAPI } from './handler';
 import { AutomationConfiguration, AutomationModel } from './model';
 
@@ -47,18 +47,19 @@ export class AutomationBody extends ReactWidget {
       return;
     }
     const { path } = this._browserFactory.defaultBrowser.model;
-    console.log('RENDER!!');
 
     requestAPI<any>('launch?folder=' + path)
       .then(d => {
         this._model.configuration = new AutomationConfiguration(
           d.path,
+          d.folder,
           d.name,
-          d.version
+          d.version,
+          d.batches
         );
       })
       .catch(d => {
-        console.error(d.message);
+        this._model.error = d;
       });
 
     this._isDirty = false;
@@ -67,7 +68,7 @@ export class AutomationBody extends ReactWidget {
   private _model: AutomationModel;
   private _browserFactory: IFileBrowserFactory;
   private _docManager: IDocumentManager;
-  private _isDirty = false;
+  private _isDirty = true;
 }
 
 const AutomationComponent = ({
@@ -77,30 +78,64 @@ const AutomationComponent = ({
   model: AutomationModel;
   docManager: IDocumentManager;
 }): JSX.Element => {
-  const { configuration } = model;
-  const { path, name, version } = configuration;
+  const { configuration, error } = model;
+  const { path, folder, name, version, batches } = configuration;
+  const { message, code } = error;
 
-  function onClickEditConfiguration() {
-    docManager.openOrReveal(path);
+  let content;
+  if (code === ErrorCode.CONFIGURATION_NOT_FOUND) {
+    content = '';
+  } else if (message) {
+    content = message;
+  } else {
+    const batchLinks = batches.map((d, i) => (
+      <a
+        className="crosscompute-BatchesLink crosscompute-Link"
+        onClick={() =>
+          docManager.openOrReveal(folder + '/' + d.configuration.path)
+        }
+        key={i}
+      >
+        Batches Configuration
+      </a>
+    ));
+    content = (
+      <div className="crosscompute-AutomationInformation">
+        <div className="crosscompute-AutomationInformationHeader">
+          <div className="crosscompute-AutomationName">{name}</div>
+          <div className="crosscompute-AutomationVersion">{version}</div>
+        </div>
+        <div className="crosscompute-AutomationInformationBody">
+          <div>
+            <a
+              className="crosscompute-ConfigurationLink crosscompute-Link"
+              onClick={() => docManager.openOrReveal(path)}
+            >
+              Automation Configuration
+            </a>
+          </div>
+          {batchLinks.length > 0 && <div>{batchLinks}</div>}
+          <button>Launch</button>
+        </div>
+      </div>
+    );
   }
 
-  if (!name) {
-    return <>CrossCompute Analytics Automation Framework</>;
-  }
+  const reference = (
+    <div className="crosscompute-AutomationReference">
+      <a
+        className="crosscompute-Link"
+        href="https://d.crosscompute.com"
+        target="_blank"
+      >
+        CrossCompute Documentation
+      </a>
+    </div>
+  );
   return (
     <>
-      <div className="crosscompute-AutomationHeader">
-        <div className="crosscompute-AutomationName">{name}</div>
-        <div className="crosscompute-AutomationVersion">{version}</div>
-      </div>
-      <div>
-        <a
-          className="crosscompute-AutomationEdit"
-          onClick={onClickEditConfiguration}
-        >
-          Edit Configuration
-        </a>
-      </div>
+      {content}
+      {reference}
     </>
   );
 };

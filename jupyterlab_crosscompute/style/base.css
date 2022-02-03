@@ -1,25 +1,28 @@
+.crosscompute-Link {
+  color: var(--jp-content-link-color);
+}
+
+.crosscompute-Link:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
 .crosscompute-Automation {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background: var(--jp-layout-color1);
   padding: 8px 12px;
 }
 
-.crosscompute-AutomationHeader {
-  text-align: center;
-  margin-bottom: 1em;
+.crosscompute-AutomationInformation > * + * {
+  margin-top: 1em;
+}
+
+.crosscompute-AutomationInformationBody > * + * {
+  margin-top: 1em;
 }
 
 .crosscompute-AutomationName {
   font-size: large;
-}
-
-.crosscompute-AutomationVersion {
-}
-
-.crosscompute-AutomationEdit {
-  color: blue;
-}
-
-.crosscompute-AutomationEdit:hover {
-  color: blue;
-  text-decoration: underline;
 }
