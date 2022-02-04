@@ -1,7 +1,0 @@
-{
-  "ServerApp": {
-    "jpserver_extensions": {
-      "crosscompute_jupyterlab_extensions": true
-    }
-  }
-}

@@ -1,2 +1,0 @@
-NAME = 'CrossCompute'
-NAMESPACE = 'crosscompute'
