@@ -59,7 +59,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(START_LAUNCH_COMMAND, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
-        automationModel.updateConfiguration(uri='?');
+        automationModel.launch.uri = '?';
+        automationModel.changed.emit();
         /*
         const formData = new FormData();
         formData.append('path', browser.model.path);

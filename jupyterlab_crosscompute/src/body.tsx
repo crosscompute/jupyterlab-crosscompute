@@ -6,7 +6,7 @@ import React from 'react';
 
 import { ErrorCode, logoIcon, START_LAUNCH_COMMAND } from './constant';
 import { requestAPI } from './handler';
-import { AutomationConfiguration, AutomationModel } from './model';
+import { AutomationModel } from './model';
 
 export class AutomationBody extends ReactWidget {
   constructor(
@@ -55,22 +55,16 @@ export class AutomationBody extends ReactWidget {
       return;
     }
     const { path } = this._browserFactory.defaultBrowser.model;
-
     requestAPI<any>('launch?folder=' + path)
       .then(d => {
-        this._model.configuration = new AutomationConfiguration(
-          d.path,
-          d.folder,
-          d.uri,
-          d.name,
-          d.version,
-          d.batches
-        );
+        this._model.launch = d;
+        this._model.error = {};
+        this._model.changed.emit();
       })
       .catch(d => {
         this._model.error = d;
+        this._model.changed.emit();
       });
-
     this._isDirty = false;
   }
 
@@ -92,17 +86,21 @@ const AutomationComponent = ({
   openFolder: (folder: string) => void;
   commands: CommandRegistry;
 }): JSX.Element => {
-  const { configuration, error } = model;
-  const { path, folder, uri, name, version, batches } = configuration;
-  const { message, code } = error;
+  const { launch, error } = model;
 
   let content;
-  if (code === ErrorCode.CONFIGURATION_NOT_FOUND) {
-    content = '';
-  } else if (message) {
-    content = message;
-  } else {
-    const batchLinks = batches.map((d, i) => (
+  if (error.code) {
+    const { message, code } = error;
+    switch (code) {
+      case ErrorCode.CONFIGURATION_NOT_FOUND:
+        content = '';
+        break;
+      default:
+        content = message;
+    }
+  } else if (launch.path) {
+    const { path, folder, name, version, batches } = launch;
+    const batchLinks = batches?.map((d, i) => (
       <li key={i}>
         <a
           className="crosscompute-Link"
@@ -123,7 +121,6 @@ const AutomationComponent = ({
         <div className="crosscompute-AutomationInformationHeader">
           <div className="crosscompute-AutomationName">{name}</div>
           <div className="crosscompute-AutomationVersion">{version}</div>
-          {uri}
         </div>
         <div className="crosscompute-AutomationInformationBody">
           <div>
@@ -131,24 +128,29 @@ const AutomationComponent = ({
               Automation Configuration
             </a>
           </div>
-          {batchLinks.length > 0 && (
+          {batchLinks && (
             <div className="crosscompute-BatchDefinitions">
               Batch Definitions
               <ul>{batchLinks}</ul>
             </div>
           )}
-          <button
-            onClick={() =>
-              commands.execute(START_LAUNCH_COMMAND).catch(reason => {
-                console.error(`could not launch automation: ${reason}`);
-              })
-            }
-          >
-            Launch
-          </button>
+          <div className="crosscompute-LaunchControl">
+            {launch.uri}
+            <button
+              onClick={() =>
+                commands.execute(START_LAUNCH_COMMAND).catch(reason => {
+                  console.error(`could not launch automation: ${reason}`);
+                })
+              }
+            >
+              Launch
+            </button>
+          </div>
         </div>
       </div>
     );
+  } else {
+    content = '';
   }
 
   const reference = (
