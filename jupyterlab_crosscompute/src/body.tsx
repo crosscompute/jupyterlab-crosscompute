@@ -1,15 +1,17 @@
+import { CommandRegistry } from '@lumino/commands';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import React from 'react';
 
-import { ErrorCode, logoIcon } from './constant';
+import { ErrorCode, logoIcon, START_LAUNCH_COMMAND } from './constant';
 import { requestAPI } from './handler';
 import { AutomationConfiguration, AutomationModel } from './model';
 
 export class AutomationBody extends ReactWidget {
   constructor(
     model: AutomationModel,
+    commands: CommandRegistry,
     browserFactory: IFileBrowserFactory,
     docManager: IDocumentManager
   ) {
@@ -17,6 +19,7 @@ export class AutomationBody extends ReactWidget {
     this._model = model;
     this._browserFactory = browserFactory;
     this._docManager = docManager;
+    this._commands = commands;
 
     this.id = 'crosscompute-automation';
     this.addClass('crosscompute-Automation');
@@ -35,6 +38,7 @@ export class AutomationBody extends ReactWidget {
         {() => (
           <AutomationComponent
             model={this._model}
+            commands={this._commands}
             openPath={openPath}
             openFolder={openFolder}
           />
@@ -57,6 +61,7 @@ export class AutomationBody extends ReactWidget {
         this._model.configuration = new AutomationConfiguration(
           d.path,
           d.folder,
+          d.uri,
           d.name,
           d.version,
           d.batches
@@ -72,20 +77,23 @@ export class AutomationBody extends ReactWidget {
   private _model: AutomationModel;
   private _browserFactory: IFileBrowserFactory;
   private _docManager: IDocumentManager;
+  private _commands: CommandRegistry;
   private _isDirty = true;
 }
 
 const AutomationComponent = ({
   model,
+  commands,
   openPath,
   openFolder
 }: {
   model: AutomationModel;
   openPath: (path: string) => void;
   openFolder: (folder: string) => void;
+  commands: CommandRegistry;
 }): JSX.Element => {
   const { configuration, error } = model;
-  const { path, folder, name, version, batches } = configuration;
+  const { path, folder, uri, name, version, batches } = configuration;
   const { message, code } = error;
 
   let content;
@@ -115,6 +123,7 @@ const AutomationComponent = ({
         <div className="crosscompute-AutomationInformationHeader">
           <div className="crosscompute-AutomationName">{name}</div>
           <div className="crosscompute-AutomationVersion">{version}</div>
+          {uri}
         </div>
         <div className="crosscompute-AutomationInformationBody">
           <div>
@@ -128,7 +137,15 @@ const AutomationComponent = ({
               <ul>{batchLinks}</ul>
             </div>
           )}
-          <button>Launch</button>
+          <button
+            onClick={() =>
+              commands.execute(START_LAUNCH_COMMAND).catch(reason => {
+                console.error(`could not launch automation: ${reason}`);
+              })
+            }
+          >
+            Launch
+          </button>
         </div>
       </div>
     );

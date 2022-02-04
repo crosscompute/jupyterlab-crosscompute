@@ -1,7 +1,5 @@
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { AutomationError } from './err';
-
 export class AutomationModel {
   get configuration(): AutomationConfiguration {
     return this._configuration;
@@ -29,19 +27,22 @@ export class AutomationModel {
   private _configuration: AutomationConfiguration =
     new AutomationConfiguration();
   private _error: AutomationError = new AutomationError();
-  private _changed = new Signal<this, void>(this);
+
+  changed = new Signal<this, void>(this);
 }
 
 export class AutomationConfiguration {
   constructor(
     path = '',
     folder = '',
+    uri = '',
     name = '',
     version = '',
     batches: IBatchDefinition[] = []
   ) {
     this.path = path;
     this.folder = folder;
+    this.uri = uri;
     this.name = name;
     this.version = version;
     this.batches = batches;
@@ -49,6 +50,7 @@ export class AutomationConfiguration {
 
   path: string;
   folder: string;
+  uri: string;
   name: string;
   version: string;
   batches: IBatchDefinition[];
@@ -58,4 +60,14 @@ interface IBatchDefinition {
   name: string;
   folder: string;
   configuration: { path: string };
+}
+
+export class AutomationError {
+  constructor(message = '', code = 0) {
+    this.message = message;
+    this.code = code;
+  }
+
+  message: string;
+  code: number;
 }
