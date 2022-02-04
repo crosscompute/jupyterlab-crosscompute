@@ -6,7 +6,7 @@ export class AutomationModel {
   changed = new Signal<this, void>(this);
 }
 
-interface ILaunchState {
+export interface ILaunchState {
   path: string;
   folder: string;
   name: string;

@@ -10,16 +10,8 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 // import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
-import {
-  COMMAND_CATEGORY,
-  // START_DEPLOY_COMMAND,
-  START_LAUNCH_COMMAND,
-  // START_RENDER_COMMAND,
-  // STOP_DEPLOY_COMMAND,
-  STOP_LAUNCH_COMMAND
-  // STOP_RENDER_COMMAND,
-} from './constant';
-// import { requestAPI } from './handler';
+import { CommandIDs, COMMAND_CATEGORY } from './constant';
+import { requestAPI } from './handler';
 import { AutomationBody } from './body';
 import { AutomationModel } from './model';
 
@@ -56,32 +48,33 @@ const plugin: JupyterFrontEndPlugin<void> = {
     browser.model.pathChanged.connect(() => automationBody.onUpdate(true));
     shell.add(automationBody, 'right', { rank: 1000 });
 
-    commands.addCommand(START_LAUNCH_COMMAND, {
+    commands.addCommand(CommandIDs.launchStart, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
-        automationModel.launch.uri = '?';
-        automationModel.changed.emit();
-        /*
         const formData = new FormData();
-        formData.append('path', browser.model.path);
+        formData.append('folder', browser.model.path);
         requestAPI<any>('launch', {
           method: 'POST',
           body: formData
         })
           .then(d => {
-            console.log(d);
+            automationModel.launch.uri = d.uri;
+            automationModel.error = {};
+            automationModel.changed.emit();
           })
           .catch(d => {
-            console.error(d);
-            console.log(d.message);
+            automationModel.error = d;
+            automationModel.changed.emit();
           });
-        */
+        automationModel.launch.uri = '?';
+        automationModel.changed.emit();
       }
     });
-    commands.addCommand(STOP_LAUNCH_COMMAND, {
+    commands.addCommand(CommandIDs.launchStop, {
       label: trans.__('Stop Launch Automation'),
       execute: (args: any) => {
-        console.log(STOP_LAUNCH_COMMAND);
+        automationModel.launch.uri = '';
+        automationModel.changed.emit();
       }
     });
     /*
@@ -113,11 +106,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     if (palette) {
       palette.addItem({
-        command: START_LAUNCH_COMMAND,
+        command: CommandIDs.launchStart,
         category: COMMAND_CATEGORY
       });
       palette.addItem({
-        command: STOP_LAUNCH_COMMAND,
+        command: CommandIDs.launchStop,
         category: COMMAND_CATEGORY
       });
       /*

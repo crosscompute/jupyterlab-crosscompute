@@ -19,10 +19,33 @@
   margin-top: 1em;
 }
 
+.crosscompute-AutomationInformationHeader {
+  font-size: large;
+}
+
+.crosscompute-AutomationName {
+  font-weight: bold;
+}
+
 .crosscompute-AutomationInformationBody > * + * {
   margin-top: 1em;
 }
 
-.crosscompute-AutomationName {
-  font-size: large;
+.crosscompute-BatchDefinitionsHeader {
+  font-weight: bold;
+}
+
+.crosscompute-BatchDefinitions ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.crosscompute-LaunchControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.crosscompute-LaunchControl button {
+  font-size: medium;
 }

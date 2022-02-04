@@ -1,3 +1,4 @@
+# import atexit
 import json
 import tornado
 from crosscompute.exceptions import (
@@ -30,7 +31,7 @@ class RouteHandler(APIHandler):
             self.set_status(422)
             return self.finish(json.dumps({'message': str(e)}))
         automation_dictionary = get_automation_dictionary(
-            automation, PROCESSES_BY_FOLDER)
+            automation, LAUNCH_STATE_BY_FOLDER)
         return self.finish(json.dumps(automation_dictionary))
 
     @tornado.web.authenticated
@@ -45,15 +46,14 @@ class RouteHandler(APIHandler):
             self.set_status(422)
             return self.finish(json.dumps({'message': str(e)}))
         server_process = Process(target=serve, args=(
-            automation, host, port), kwargs={'with_browser': False},
-            daemon=True)
+            automation, host, port), kwargs={'with_browser': False})
         processes = [server_process]
         # TODO: Add run processes
         for process in processes:
             process.start()
-        PROCESSES_BY_FOLDER[folder] = processes
         # TODO: Use proxy to get uri if a proxy is available
         uri = f'{self.request.protocol}://{self.request.host_name}:{port}'
+        LAUNCH_STATE_BY_FOLDER[folder] = {'uri': uri, 'processes': processes}
         self.finish(json.dumps({
             'uri': uri,
         }))
@@ -67,4 +67,14 @@ def setup_handlers(web_app):
     ])
 
 
-PROCESSES_BY_FOLDER = {}
+'''
+def stop_processes():
+    for state in LAUNCH_STATE_BY_FOLDER.values():
+        for process in state['processes']:
+            process.close()
+            process
+'''
+
+
+LAUNCH_STATE_BY_FOLDER = {}
+# atexit.register(stop_processes)

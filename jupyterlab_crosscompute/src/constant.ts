@@ -6,15 +6,17 @@ export const logoIcon = new LabIcon({
   svgstr: logoSvgstr
 });
 
-export namespace ErrorCode {
-  export const CONFIGURATION_NOT_FOUND = -100;
+export namespace CommandIDs {
+  export const launchStart = 'crosscompute:launch:start';
+  export const launchStop = 'crosscompute:launch:stop';
+  // export const renderStart = 'crosscompute:render:start';
+  // export const renderStop = 'crosscompute:render:stop';
+  // export const deployStart = 'crosscompute:deploy:start';
+  // export const deployStop = 'crosscompute:deploy:stop';
 }
 
-export const START_LAUNCH_COMMAND = 'crosscompute:launch:start';
-export const STOP_LAUNCH_COMMAND = 'crosscompute:launch:stop';
-// export const START_RENDER_COMMAND = 'crosscompute:render:start';
-// export const STOP_RENDER_COMMAND = 'crosscompute:render:stop';
-// export const START_DEPLOY_COMMAND = 'crosscompute:deploy:start';
-// export const STOP_DEPLOY_COMMAND = 'crosscompute:deploy:stop';
+export namespace ErrorCode {
+  export const configurationNotFound = -100;
+}
 
 export const COMMAND_CATEGORY = 'CrossCompute';

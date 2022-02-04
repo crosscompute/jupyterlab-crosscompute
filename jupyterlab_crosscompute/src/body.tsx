@@ -4,9 +4,9 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import React from 'react';
 
-import { ErrorCode, logoIcon, START_LAUNCH_COMMAND } from './constant';
+import { CommandIDs, ErrorCode, logoIcon } from './constant';
 import { requestAPI } from './handler';
-import { AutomationModel } from './model';
+import { AutomationModel, ILaunchState } from './model';
 
 export class AutomationBody extends ReactWidget {
   constructor(
@@ -36,7 +36,7 @@ export class AutomationBody extends ReactWidget {
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
         {() => (
-          <AutomationComponent
+          <AutomationControl
             model={this._model}
             commands={this._commands}
             openPath={openPath}
@@ -75,7 +75,7 @@ export class AutomationBody extends ReactWidget {
   private _isDirty = true;
 }
 
-const AutomationComponent = ({
+const AutomationControl = ({
   model,
   commands,
   openPath,
@@ -89,10 +89,10 @@ const AutomationComponent = ({
   const { launch, error } = model;
 
   let content;
-  if (error.code) {
+  if (error.message) {
     const { message, code } = error;
     switch (code) {
-      case ErrorCode.CONFIGURATION_NOT_FOUND:
+      case ErrorCode.configurationNotFound:
         content = '';
         break;
       default:
@@ -130,22 +130,13 @@ const AutomationComponent = ({
           </div>
           {batchLinks && (
             <div className="crosscompute-BatchDefinitions">
-              Batch Definitions
+              <div className="crosscompute-BatchDefinitionsHeader">
+                Batch Definitions
+              </div>
               <ul>{batchLinks}</ul>
             </div>
           )}
-          <div className="crosscompute-LaunchControl">
-            {launch.uri}
-            <button
-              onClick={() =>
-                commands.execute(START_LAUNCH_COMMAND).catch(reason => {
-                  console.error(`could not launch automation: ${reason}`);
-                })
-              }
-            >
-              Launch
-            </button>
-          </div>
+          <LaunchControl state={launch} commands={commands} />
         </div>
       </div>
     );
@@ -169,5 +160,43 @@ const AutomationComponent = ({
       {content}
       {reference}
     </>
+  );
+};
+
+const LaunchControl = ({
+  state,
+  commands
+}: {
+  state: ILaunchState | Record<string, never>;
+  commands: CommandRegistry;
+}): JSX.Element => {
+  const { uri } = state;
+  const link = uri.startsWith('http') ? (
+    <a className="crosscompute-Link" href={uri} target="_blank">
+      {uri}
+    </a>
+  ) : (
+    uri
+  );
+  const onClickStart = () => {
+    commands.execute(CommandIDs.launchStart).catch(reason => {
+      console.error(`could not start launch: ${reason}`);
+    });
+  };
+  const onClickStop = () => {
+    commands.execute(CommandIDs.launchStop).catch(reason => {
+      console.error(`could not stop launch: ${reason}`);
+    });
+  };
+  const button = uri ? (
+    <button onClick={onClickStop}>Stop</button>
+  ) : (
+    <button onClick={onClickStart}>Launch</button>
+  );
+  return (
+    <div className="crosscompute-LaunchControl">
+      {link}
+      {button}
+    </div>
   );
 };
