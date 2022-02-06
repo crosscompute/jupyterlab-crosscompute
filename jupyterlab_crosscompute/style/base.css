@@ -19,11 +19,8 @@
   margin-top: 1em;
 }
 
-.crosscompute-AutomationInformationHeader {
-  font-size: large;
-}
-
 .crosscompute-AutomationName {
+  font-size: large;
   font-weight: bold;
 }
 

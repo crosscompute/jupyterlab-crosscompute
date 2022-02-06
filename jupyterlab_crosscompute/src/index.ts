@@ -53,10 +53,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       execute: (args: any) => {
         const formData = new FormData();
         formData.append('folder', browser.model.path);
-        requestAPI<any>('launch', {
-          method: 'POST',
-          body: formData
-        })
+        requestAPI<any>('launch', { method: 'POST', body: formData })
           .then(d => {
             automationModel.launch.uri = d.uri;
             automationModel.error = {};
@@ -73,6 +70,18 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.launchStop, {
       label: trans.__('Stop Launch Automation'),
       execute: (args: any) => {
+        const formData = new FormData();
+        formData.append('folder', browser.model.path);
+        requestAPI<any>('launch', { method: 'DELETE', body: formData })
+          .then(d => {
+            automationModel.launch.uri = '';
+            automationModel.error = {};
+            automationModel.changed.emit();
+          })
+          .catch(d => {
+            automationModel.error = d;
+            automationModel.changed.emit();
+          });
         automationModel.launch.uri = '';
         automationModel.changed.emit();
       }
