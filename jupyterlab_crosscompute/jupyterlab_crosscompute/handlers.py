@@ -41,7 +41,7 @@ class RouteHandler(APIHandler):
         port = find_open_port()
         folder = self.get_argument('folder').strip() or '.'
         process = subprocess.Popen([
-            'crosscompute', '--host', host or 'localhost',
+            'crosscompute', '--host', host or '*',
             '--port', str(port), '--no-browser',
         ], cwd=folder, start_new_session=True)
         # TODO: Show logs using server sent events
