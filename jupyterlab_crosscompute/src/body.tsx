@@ -119,8 +119,10 @@ const AutomationControl = ({
     content = (
       <div className="crosscompute-AutomationInformation">
         <div className="crosscompute-AutomationInformationHeader">
-          <div className="crosscompute-AutomationName">{name}</div>
-          <div className="crosscompute-AutomationVersion">{version}</div>
+          <div className="crosscompute-AutomationName">{name || 'No Name'}</div>
+          <div className="crosscompute-AutomationVersion">
+            {version || 'No Version'}
+          </div>
         </div>
         <div className="crosscompute-AutomationInformationBody">
           <div>
