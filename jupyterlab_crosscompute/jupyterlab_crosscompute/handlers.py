@@ -3,6 +3,7 @@ import atexit
 import json
 import subprocess
 import tornado
+from crosscompute.constants import Error
 from crosscompute.exceptions import (
     CrossComputeConfigurationNotFoundError, CrossComputeError)
 from crosscompute.routines.automation import Automation
@@ -10,7 +11,7 @@ from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
 
-from .constants import Error, NAMESPACE
+from .constants import NAMESPACE
 from .macros import find_open_port, terminate_process
 from .routines import get_automation_dictionary
 
