@@ -10,6 +10,7 @@ from crosscompute.routines.automation import Automation
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
+from os.path import relpath
 
 from .constants import NAMESPACE
 from .macros import find_open_port, terminate_process
@@ -30,7 +31,10 @@ class RouteHandler(APIHandler):
                 'code': Error.CONFIGURATION_NOT_FOUND}))
         except CrossComputeError as e:
             self.set_status(422)
-            return self.finish(json.dumps({'message': str(e)}))
+            d = {'message': str(e)}
+            if hasattr(e, 'path'):
+                d['path'] = relpath(e.path)
+            return self.finish(json.dumps(d))
         automation_dictionary = get_automation_dictionary(
             automation, LAUNCH_STATE_BY_FOLDER)
         return self.finish(json.dumps(automation_dictionary))

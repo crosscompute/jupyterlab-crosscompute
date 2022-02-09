@@ -1,18 +1,10 @@
-.crosscompute-Link {
-  color: var(--jp-content-link-color);
-}
-
-.crosscompute-Link:hover {
-  color: var(--jp-content-link-color);
-  text-decoration: underline;
-}
-
 .crosscompute-Automation {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: var(--jp-layout-color1);
   padding: 8px 12px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .crosscompute-AutomationInformation > * + * {
@@ -45,4 +37,13 @@
 
 .crosscompute-LaunchControl button {
   font-size: medium;
+}
+
+.crosscompute-Link {
+  color: var(--jp-content-link-color);
+}
+
+.crosscompute-Link:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
 }

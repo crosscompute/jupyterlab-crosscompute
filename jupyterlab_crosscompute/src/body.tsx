@@ -90,13 +90,21 @@ const AutomationControl = ({
 
   let content;
   if (error.message) {
-    const { message, code } = error;
+    const { message, code, path } = error;
     switch (code) {
-      case ErrorCode.configurationNotFound:
+      case ErrorCode.configurationNotFound: {
         content = '';
         break;
-      default:
-        content = message;
+      }
+      default: {
+        content = path ? (
+          <a className="crosscompute-Link" onClick={() => openPath(path)}>
+            {message}
+          </a>
+        ) : (
+          message
+        );
+      }
     }
   } else if (launch.path) {
     const { path, folder, name, version, batches } = launch;

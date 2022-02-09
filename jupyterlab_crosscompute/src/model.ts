@@ -24,4 +24,5 @@ interface IBatchDefinition {
 interface IAutomationError {
   message: string;
   code: number;
+  path: string;
 }
