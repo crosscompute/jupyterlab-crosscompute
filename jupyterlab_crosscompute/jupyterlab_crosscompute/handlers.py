@@ -6,7 +6,7 @@ import tornado
 from crosscompute.constants import Error
 from crosscompute.exceptions import (
     CrossComputeConfigurationNotFoundError, CrossComputeError)
-from crosscompute.routines.automation import Automation
+from crosscompute.routines.automation import DiskAutomation
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
@@ -23,7 +23,7 @@ class RouteHandler(APIHandler):
     def get(self):
         folder = self.get_argument('folder').strip() or '.'
         try:
-            automation = Automation.load(folder)
+            automation = DiskAutomation.load(folder)
         except CrossComputeConfigurationNotFoundError as e:
             self.set_status(404)
             return self.finish(json.dumps({
@@ -41,13 +41,18 @@ class RouteHandler(APIHandler):
 
     @tornado.web.authenticated
     def post(self):
+        request = self.request
         settings = self.settings
         host = settings['serverapp'].ip
         port = find_open_port()
         folder = self.get_argument('folder').strip() or '.'
+        origin = f'{request.protocol}://{request.host}'
         process = subprocess.Popen([
-            'crosscompute', '--host', host or '*',
-            '--port', str(port), '--no-browser',
+            'crosscompute',
+            '--host', host or '*',
+            '--port', str(port),
+            '--no-browser',
+            '--origins', origin,
         ], cwd=folder, start_new_session=True)
         # TODO: Show logs using server sent events
         # TODO: Use proxy to get uri if a proxy is available

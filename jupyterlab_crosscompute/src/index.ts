@@ -10,7 +10,7 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 // import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
-import { CommandIDs, COMMAND_CATEGORY } from './constant';
+import { CommandIDs, IIntervalIds, COMMAND_CATEGORY } from './constant';
 import { requestAPI } from './handler';
 import { AutomationBody } from './body';
 import { AutomationModel } from './model';
@@ -44,6 +44,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
       browserFactory,
       docManager
     );
+    const intervalIds: IIntervalIds = {};
+
     labShell.layoutModified.connect(() => automationBody.onUpdate());
     browser.model.pathChanged.connect(() => automationBody.onUpdate(true));
     shell.add(automationBody, 'right', { rank: 1000 });
@@ -55,15 +57,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
         formData.append('folder', browser.model.path);
         requestAPI<any>('launch', { method: 'POST', body: formData })
           .then(d => {
-            automationModel.launch.uri = d.uri;
-            automationModel.error = {};
-            automationModel.changed.emit();
+            const { uri } = d;
+            const intervalId = setInterval(() => {
+              fetch(uri, { method: 'HEAD' }).then(() => {
+                automationModel.launch.uri = uri;
+                automationModel.error = {};
+                automationModel.changed.emit();
+                clearInterval(intervalId);
+              });
+            }, 1000);
+            intervalIds.launch = intervalId;
           })
           .catch(d => {
             automationModel.error = d;
             automationModel.changed.emit();
           });
-        automationModel.launch.uri = '?';
+        automationModel.launch.uri = 'Launching...';
         automationModel.changed.emit();
       }
     });
@@ -84,6 +93,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           });
         automationModel.launch.uri = '';
         automationModel.changed.emit();
+        clearInterval(intervalIds.launch);
       }
     });
     /*

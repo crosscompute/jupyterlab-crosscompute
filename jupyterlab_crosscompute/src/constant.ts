@@ -20,3 +20,7 @@ export namespace ErrorCode {
 }
 
 export const COMMAND_CATEGORY = 'CrossCompute';
+
+export interface IIntervalIds {
+  launch?: number;
+}
