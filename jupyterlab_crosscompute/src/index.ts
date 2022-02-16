@@ -35,26 +35,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer?: ILayoutRestorer
   ) => {
     const { commands, shell } = app;
-    const browser = browserFactory.defaultBrowser;
+    const browserModel = browserFactory.defaultBrowser.model;
     const trans = translator.load('jupyterlab');
     const automationModel = new AutomationModel();
     const automationBody = new AutomationBody(
       automationModel,
-      commands,
-      browserFactory,
-      docManager
+      browserModel,
+      docManager,
+      commands
     );
     const intervalIds: IIntervalIds = {};
 
     labShell.layoutModified.connect(() => automationBody.onUpdate());
-    browser.model.pathChanged.connect(() => automationBody.onUpdate(true));
+    browserModel.pathChanged.connect(() => automationBody.onUpdate(true));
     shell.add(automationBody, 'right', { rank: 1000 });
 
     commands.addCommand(CommandIDs.launchStart, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
         const formData = new FormData();
-        formData.append('folder', browser.model.path);
+        formData.append('folder', browserModel.path);
         requestAPI<any>('launch', { method: 'POST', body: formData })
           .then(d => {
             const { uri } = d;
@@ -80,7 +80,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Stop Launch Automation'),
       execute: (args: any) => {
         const formData = new FormData();
-        formData.append('folder', browser.model.path);
+        formData.append('folder', browserModel.path);
         requestAPI<any>('launch', { method: 'DELETE', body: formData })
           .then(d => {
             automationModel.launch.uri = '';

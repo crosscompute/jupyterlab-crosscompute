@@ -1,7 +1,7 @@
 import { CommandRegistry } from '@lumino/commands';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import React from 'react';
 
 import { CommandIDs, ErrorCode, logoIcon } from './constant';
@@ -11,13 +11,13 @@ import { AutomationModel, ILaunchState } from './model';
 export class AutomationBody extends ReactWidget {
   constructor(
     model: AutomationModel,
-    commands: CommandRegistry,
-    browserFactory: IFileBrowserFactory,
-    docManager: IDocumentManager
+    browserModel: FileBrowserModel,
+    docManager: IDocumentManager,
+    commands: CommandRegistry
   ) {
     super();
     this._model = model;
-    this._browserFactory = browserFactory;
+    this._browserModel = browserModel;
     this._docManager = docManager;
     this._commands = commands;
 
@@ -31,8 +31,7 @@ export class AutomationBody extends ReactWidget {
 
   render(): JSX.Element {
     const openPath = (path: string) => this._docManager.openOrReveal(path);
-    const openFolder = (folder: string) =>
-      this._browserFactory.defaultBrowser.model.cd(folder);
+    const openFolder = (folder: string) => this._browserModel.cd(folder);
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
         {() => (
@@ -54,7 +53,7 @@ export class AutomationBody extends ReactWidget {
     if (this.isHidden || !this._isDirty) {
       return;
     }
-    const { path } = this._browserFactory.defaultBrowser.model;
+    const { path } = this._browserModel;
     requestAPI<any>('launch?folder=' + path)
       .then(d => {
         this._model.launch = d;
@@ -69,7 +68,7 @@ export class AutomationBody extends ReactWidget {
   }
 
   private _model: AutomationModel;
-  private _browserFactory: IFileBrowserFactory;
+  private _browserModel: FileBrowserModel;
   private _docManager: IDocumentManager;
   private _commands: CommandRegistry;
   private _isDirty = true;
@@ -93,7 +92,17 @@ const AutomationControl = ({
     const { message, code, path } = error;
     switch (code) {
       case ErrorCode.configurationNotFound: {
-        content = '';
+        const automationFolder = launch.folder;
+        content = automationFolder ? (
+          <a
+            className="crosscompute-Link"
+            onClick={() => openFolder(automationFolder)}
+          >
+            {launch.name ? `${launch.name} ${launch.version}` : 'Automation Folder'}
+          </a>
+        ) : (
+          ''
+        );
         break;
       }
       default: {

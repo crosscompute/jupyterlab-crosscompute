@@ -7,8 +7,8 @@ def get_automation_dictionary(automation, state_by_folder):
     automation_folder = automation.folder
     state = state_by_folder.get(automation_folder, {})
     automation_dictionary = {
-        'path': str(configuration_path),
-        'folder': relpath(automation_folder),
+        'path': '/' + relpath(configuration_path),
+        'folder': '/' + relpath(automation_folder),
         'uri': state.get('uri', ''),
         'name': configuration.get('name', ''),
         'version': configuration.get('version', ''),
