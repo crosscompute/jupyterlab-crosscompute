@@ -98,7 +98,9 @@ const AutomationControl = ({
             className="crosscompute-Link"
             onClick={() => openFolder(automationFolder)}
           >
-            {launch.name ? `${launch.name} ${launch.version}` : 'Automation Folder'}
+            {launch.name
+              ? `${launch.name} ${launch.version}`
+              : 'Automation Folder'}
           </a>
         ) : (
           ''
