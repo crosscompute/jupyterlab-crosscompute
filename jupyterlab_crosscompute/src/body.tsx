@@ -221,11 +221,11 @@ const Launch = ({
   );
   return (
     <div className="crosscompute-Launch">
-      {information}
       <div className="crosscompute-LaunchControl">
         {link}
         {button}
       </div>
+      {information}
     </div>
   );
 };
