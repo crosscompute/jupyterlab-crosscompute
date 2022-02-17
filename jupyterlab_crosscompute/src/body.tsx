@@ -157,7 +157,7 @@ const AutomationControl = ({
               <ul>{batchLinks}</ul>
             </div>
           )}
-          <LaunchControl state={launch} commands={commands} />
+          <Launch state={launch} commands={commands} />
         </div>
       </div>
     );
@@ -184,7 +184,7 @@ const AutomationControl = ({
   );
 };
 
-const LaunchControl = ({
+const Launch = ({
   state,
   commands
 }: {
@@ -192,6 +192,7 @@ const LaunchControl = ({
   commands: CommandRegistry;
 }): JSX.Element => {
   const { uri } = state;
+  const log = uri ?  <div className="crosscompute-LaunchLog"></div> : '';
   const link = uri.startsWith('http') ? (
     <a className="crosscompute-Link" href={uri} target="_blank">
       {uri}
@@ -215,9 +216,12 @@ const LaunchControl = ({
     <button onClick={onClickStart}>Launch</button>
   );
   return (
-    <div className="crosscompute-LaunchControl">
-      {link}
-      {button}
+    <div className="crosscompute-Launch">
+      {log}
+      <div className="crosscompute-LaunchControl">
+        {link}
+        {button}
+      </div>
     </div>
   );
 };

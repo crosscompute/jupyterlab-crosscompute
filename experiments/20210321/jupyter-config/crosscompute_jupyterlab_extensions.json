@@ -1,7 +1,0 @@
-{
-  "NotebookApp": {
-    "nbserver_extensions": {
-      "crosscompute_jupyterlab_extensions": true
-    }
-  }
-}

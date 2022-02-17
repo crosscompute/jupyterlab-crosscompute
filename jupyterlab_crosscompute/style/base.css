@@ -33,6 +33,10 @@
   padding-left: 0;
 }
 
+.crosscompute-LaunchLog {
+  width: 100%;
+}
+
 .crosscompute-LaunchControl {
   display: flex;
   justify-content: space-between;

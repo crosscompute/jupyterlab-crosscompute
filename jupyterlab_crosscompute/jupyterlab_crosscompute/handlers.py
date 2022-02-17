@@ -17,7 +17,7 @@ from .macros import find_open_port, terminate_process
 from .routines import get_automation_dictionary
 
 
-class RouteHandler(APIHandler):
+class LaunchHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
@@ -80,7 +80,7 @@ def setup_handlers(web_app):
     host_pattern = '.*$'
     base_url = web_app.settings['base_url']
     web_app.add_handlers(host_pattern, [
-        (url_path_join(base_url, NAMESPACE, 'launch'), RouteHandler),
+        (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
     ])
 
 
