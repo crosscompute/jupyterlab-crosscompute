@@ -5,6 +5,11 @@
   padding: 8px 12px;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
+  overflow: auto;
+}
+
+.crosscompute-Automation > * + * {
+  margin-top: 1em;
 }
 
 .crosscompute-Automation button:hover {
@@ -34,7 +39,10 @@
 }
 
 .crosscompute-LaunchLog {
+  background: var(--jp-inverse-layout-color2);
+  color: var(--jp-ui-inverse-font-color0);
   width: 100%;
+  overflow: auto;
 }
 
 .crosscompute-LaunchControl {

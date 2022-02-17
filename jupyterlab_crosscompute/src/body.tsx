@@ -191,8 +191,12 @@ const Launch = ({
   state: ILaunchState | Record<string, never>;
   commands: CommandRegistry;
 }): JSX.Element => {
-  const { uri } = state;
-  const log = uri ?  <div className="crosscompute-LaunchLog"></div> : '';
+  const { uri, log } = state;
+  const information = uri ? (
+    <pre className="crosscompute-LaunchLog">{log?.text}</pre>
+  ) : (
+    ''
+  );
   const link = uri.startsWith('http') ? (
     <a className="crosscompute-Link" href={uri} target="_blank">
       {uri}
@@ -217,7 +221,7 @@ const Launch = ({
   );
   return (
     <div className="crosscompute-Launch">
-      {log}
+      {information}
       <div className="crosscompute-LaunchControl">
         {link}
         {button}

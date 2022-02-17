@@ -11,6 +11,9 @@ from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
 from os.path import relpath
+from pathlib import Path
+from shutil import rmtree
+from tempfile import mkdtemp
 
 from .constants import NAMESPACE
 from .macros import find_open_port, terminate_process
@@ -47,17 +50,19 @@ class LaunchHandler(APIHandler):
         port = find_open_port()
         folder = self.get_argument('folder').strip() or '.'
         origin = f'{request.protocol}://{request.host}'
+        log_path = LOG_FOLDER / f'{port}.log'
         process = subprocess.Popen([
             'crosscompute',
             '--host', host or '*',
             '--port', str(port),
             '--no-browser',
             '--origins', origin,
-        ], cwd=folder, start_new_session=True)
-        # TODO: Show logs using server sent events
+        ], cwd=folder, start_new_session=True, stdout=open(
+            log_path, 'wt'), stderr=subprocess.STDOUT)
         # TODO: Use proxy to get uri if a proxy is available
         uri = f'{self.request.protocol}://{self.request.host_name}:{port}'
-        LAUNCH_STATE_BY_FOLDER[folder] = {'uri': uri, 'process': process}
+        LAUNCH_STATE_BY_FOLDER[folder] = {
+            'uri': uri, 'process': process, 'path': log_path}
         self.finish(json.dumps({
             'uri': uri,
         }))
@@ -76,27 +81,41 @@ class LaunchHandler(APIHandler):
         self.finish(json.dumps({}))
 
 
+class LogHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self):
+        folder = self.get_argument('folder').strip() or '.'
+        try:
+            state = LAUNCH_STATE_BY_FOLDER[folder]
+        except KeyError:
+            self.set_status(404)
+            return self.finish(json.dumps({}))
+        log_path = state['path']
+        with open(log_path, 'rt') as f:
+            log_text = f.read()
+        self.finish(json.dumps({'text': log_text}))
+
+
 def setup_handlers(web_app):
     host_pattern = '.*$'
     base_url = web_app.settings['base_url']
     web_app.add_handlers(host_pattern, [
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
+        (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
     ])
 
 
-def stop_processes():
+def clean():
     for folder, state in LAUNCH_STATE_BY_FOLDER.items():
         process = state['process']
         process_id = process.pid
         terminate_process(process_id)
         L.debug('terminating process %s for %s', process.pid, state)
-    '''
-    for folder, state in LAUNCH_STATE_BY_FOLDER.items():
-        process = state['process']
-        process.wait()
-    '''
+    rmtree(LOG_FOLDER)
 
 
 L = getLogger(__name__)
 LAUNCH_STATE_BY_FOLDER = {}
-atexit.register(stop_processes)
+LOG_FOLDER = Path(mkdtemp())
+atexit.register(clean)

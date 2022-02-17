@@ -44,7 +44,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       docManager,
       commands
     );
-    const intervalIds: IIntervalIds = {};
+    const intervalIdByTaskByFolder: Record<string, IIntervalIds> = {};
 
     labShell.layoutModified.connect(() => automationBody.onUpdate());
     browserModel.pathChanged.connect(() => automationBody.onUpdate(true));
@@ -53,20 +53,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.launchStart, {
       label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
+        const folder = browserModel.path;
         const formData = new FormData();
-        formData.append('folder', browserModel.path);
+        formData.append('folder', folder);
         requestAPI<any>('launch', { method: 'POST', body: formData })
           .then(d => {
             const { uri } = d;
-            const intervalId = setInterval(() => {
+            const launchIntervalId = setInterval(() => {
               fetch(uri, { method: 'HEAD' }).then(() => {
                 automationModel.launch.uri = uri;
                 automationModel.error = {};
                 automationModel.changed.emit();
-                clearInterval(intervalId);
+                clearInterval(launchIntervalId);
               });
             }, 1000);
-            intervalIds.launch = intervalId;
+            const logIntervalId = setInterval(() => {
+              requestAPI<any>('log?folder=' + folder).then(d => {
+                automationModel.launch.log = { text: d.text };
+                automationModel.changed.emit();
+              });
+            }, 3000);
+            intervalIdByTaskByFolder[folder] = {
+              launch: launchIntervalId,
+              log: logIntervalId
+            };
           })
           .catch(d => {
             automationModel.error = d;
@@ -79,8 +89,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.launchStop, {
       label: trans.__('Stop Launch Automation'),
       execute: (args: any) => {
+        const folder = browserModel.path;
+        const intervalIdByTask = intervalIdByTaskByFolder[folder];
+        clearInterval(intervalIdByTask.launch);
+        clearInterval(intervalIdByTask.log);
         const formData = new FormData();
-        formData.append('folder', browserModel.path);
+        formData.append('folder', folder);
         requestAPI<any>('launch', { method: 'DELETE', body: formData })
           .then(d => {
             automationModel.launch.uri = '';
@@ -92,8 +106,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
             automationModel.changed.emit();
           });
         automationModel.launch.uri = '';
+        automationModel.launch.log = { text: '' };
         automationModel.changed.emit();
-        clearInterval(intervalIds.launch);
       }
     });
     /*

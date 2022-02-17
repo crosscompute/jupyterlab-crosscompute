@@ -13,12 +13,17 @@ export interface ILaunchState {
   version: string;
   batches: IBatchDefinition[];
   uri: string;
+  log: ILog;
 }
 
 interface IBatchDefinition {
   name: string;
   folder: string;
   configuration: { path: string };
+}
+
+interface ILog {
+  text: string;
 }
 
 interface IAutomationError {
