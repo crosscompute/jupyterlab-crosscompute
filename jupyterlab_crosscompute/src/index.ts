@@ -7,7 +7,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-// import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
 import { CommandIDs, IIntervalIds, COMMAND_CATEGORY } from './constant';
@@ -19,11 +19,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
   requires: [IFileBrowserFactory, ILabShell, IDocumentManager, ITranslator],
-  optional: [
-    ICommandPalette,
-    // ISettingRegistry,
-    ILayoutRestorer
-  ],
+  optional: [ICommandPalette, ISettingRegistry, ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
@@ -31,7 +27,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     docManager: IDocumentManager,
     translator: ITranslator,
     palette?: ICommandPalette,
-    // settingRegistry?: ISettingRegistry,
+    settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
     const { commands, shell } = app;
@@ -59,9 +55,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
         requestAPI<any>('launch', { method: 'POST', body: formData })
           .then(d => {
             const { uri } = d;
+            automationModel.launch.uri = uri;
             const launchIntervalId = setInterval(() => {
               fetch(uri, { method: 'HEAD' }).then(() => {
-                automationModel.launch.uri = uri;
+                automationModel.launch.isReady = true;
                 automationModel.error = {};
                 automationModel.changed.emit();
                 clearInterval(launchIntervalId);
@@ -82,7 +79,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
             automationModel.error = d;
             automationModel.changed.emit();
           });
-        automationModel.launch.uri = 'Launching...';
+        automationModel.launch.isReady = false;
         automationModel.changed.emit();
       }
     });
@@ -162,18 +159,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
       */
     }
 
-    /*
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
         .then(settings => {
-          // console.log(settings.composite);
+          console.log('SETTINGS', settings.composite);
         })
         .catch(reason => {
-          // console.error(reason);
+          console.error(reason);
         });
     }
-    */
 
     if (restorer) {
       restorer.add(automationBody, automationBody.id);

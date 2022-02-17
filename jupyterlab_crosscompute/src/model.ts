@@ -14,6 +14,7 @@ export interface ILaunchState {
   batches: IBatchDefinition[];
   uri: string;
   log: ILog;
+  isReady: boolean;
 }
 
 interface IBatchDefinition {

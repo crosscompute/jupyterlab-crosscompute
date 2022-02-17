@@ -56,7 +56,7 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     install_requires=[
-        "crosscompute>0.9.1",
+        # "crosscompute>0.9.1",
         "jupyter_server>=1.6,<2",
     ],
     zip_safe=False,

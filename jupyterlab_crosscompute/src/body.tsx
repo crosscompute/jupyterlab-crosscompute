@@ -191,19 +191,8 @@ const Launch = ({
   state: ILaunchState | Record<string, never>;
   commands: CommandRegistry;
 }): JSX.Element => {
-  const { uri, log } = state;
-  const information = uri ? (
-    <pre className="crosscompute-LaunchLog">{log?.text}</pre>
-  ) : (
-    ''
-  );
-  const link = uri.startsWith('http') ? (
-    <a className="crosscompute-Link" href={uri} target="_blank">
-      {uri}
-    </a>
-  ) : (
-    uri
-  );
+  const { uri, isReady, log } = state;
+
   const onClickStart = () => {
     commands.execute(CommandIDs.launchStart).catch(reason => {
       console.error(`could not start launch: ${reason}`);
@@ -214,11 +203,34 @@ const Launch = ({
       console.error(`could not stop launch: ${reason}`);
     });
   };
-  const button = uri ? (
-    <button onClick={onClickStop}>Stop</button>
-  ) : (
-    <button onClick={onClickStart}>Launch</button>
-  );
+
+  let link;
+  if (isReady === undefined) {
+    link = '';
+  } else if (isReady === false) {
+    link = 'Launching...';
+  } else {
+    link = (
+      <a className="crosscompute-Link" href={uri} target="_blank">
+        {uri}
+      </a>
+    );
+  }
+
+  const button =
+    isReady === undefined ? (
+      <button onClick={onClickStart}>Launch</button>
+    ) : (
+      <button onClick={onClickStop}>Stop</button>
+    );
+
+  const information =
+    isReady !== undefined && log ? (
+      <pre className="crosscompute-LaunchLog">{log.text}</pre>
+    ) : (
+      ''
+    );
+
   return (
     <div className="crosscompute-Launch">
       <div className="crosscompute-LaunchControl">

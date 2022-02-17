@@ -2,17 +2,29 @@ from os.path import relpath
 
 
 def get_automation_dictionary(automation, state_by_folder):
-    configuration_path = automation.path
+    configuration_path = relpath(automation.path)
     configuration = automation.configuration
-    automation_folder = automation.folder
+    automation_folder = relpath(automation.folder)
     state = state_by_folder.get(automation_folder, {})
     automation_dictionary = {
-        'path': '/' + relpath(configuration_path),
-        'folder': '/' + relpath(automation_folder),
-        'uri': state.get('uri', ''),
+        'path': '/' + configuration_path,
+        'folder': '/' + automation_folder,
         'name': configuration.get('name', ''),
         'version': configuration.get('version', ''),
     }
+    if 'uri' in state:
+        uri = state['uri']
+        try:
+            with open(state['path'], 'rt') as f:
+                log_text = f.read()
+        except OSError:
+            log_text = ''
+        automation_dictionary.update({
+            'uri': uri,
+            # TODO: Consider isReady=False and re-check client side
+            'isReady': True,
+            'log': {'text': log_text},
+        })
     batch_definitions = []
     for batch_dictionary in configuration.get('batches', []):
         batch_definition = {
