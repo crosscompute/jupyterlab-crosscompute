@@ -59,12 +59,12 @@ class LaunchHandler(APIHandler):
             '--origins', origin,
         ], cwd=folder, start_new_session=True, stdout=open(
             log_path, 'wt'), stderr=subprocess.STDOUT)
-        # TODO: Use proxy to get uri if a proxy is available
         try:
             state = LAUNCH_STATE_BY_FOLDER[folder]
             terminate_process(state['process'].pid)
         except KeyError:
             pass
+        # TODO: Use proxy to get uri if a proxy is available
         uri = f'{self.request.protocol}://{self.request.host_name}:{port}'
         LAUNCH_STATE_BY_FOLDER[folder] = {
             'uri': uri, 'process': process, 'path': log_path}
