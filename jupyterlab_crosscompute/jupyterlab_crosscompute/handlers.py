@@ -1,6 +1,7 @@
 # TODO: Write script to check that ports in range are not being used
 import atexit
 import json
+import requests
 import subprocess
 import tornado
 from crosscompute.constants import Error
@@ -15,7 +16,7 @@ from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from .constants import NAMESPACE
+from .constants import BASE_URI, NAMESPACE
 from .macros import find_open_port, terminate_process
 from .routines import get_automation_dictionary
 
@@ -45,18 +46,32 @@ class LaunchHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         request = self.request
+        headers = request.headers
+        origin = headers['Origin']
         settings = self.settings
         host = settings['serverapp'].ip
         port = find_open_port()
         folder = self.get_argument('folder').strip() or '.'
-        origin = f'{request.protocol}://{request.host}'
-        log_path = LOG_FOLDER / f'{port}.log'
+        log_path = SERVER_FOLDER_BY_NAME['launch'] / f'{port}.log'
+
+        if 'X-Forwarded-For' in headers:
+            # TODO: Accept other proxies
+            # TODO: Use random string instead of port
+            base_uri = BASE_URI + '/' + str(port)
+            requests.post('http://localhost:6000/api/routes' + base_uri, json={
+                'target': f'http://localhost:{port}'})
+            uri = f'{origin}{base_uri}'
+        else:
+            base_uri = ''
+            uri = f'http://{request.host_name}:{port}'
+
         process = subprocess.Popen([
             'crosscompute',
             '--host', host or '*',
             '--port', str(port),
             '--no-browser',
             '--origins', origin,
+            '--base-uri', base_uri,
         ], cwd=folder, start_new_session=True, stdout=open(
             log_path, 'wt'), stderr=subprocess.STDOUT)
         try:
@@ -64,10 +79,9 @@ class LaunchHandler(APIHandler):
             terminate_process(state['process'].pid)
         except KeyError:
             pass
-        # TODO: Use proxy to get uri if a proxy is available
-        uri = f'{self.request.protocol}://{self.request.host_name}:{port}'
         LAUNCH_STATE_BY_FOLDER[folder] = {
-            'uri': uri, 'process': process, 'path': log_path}
+            'uri': uri, 'process': process, 'path': log_path,
+            'base_uri': base_uri}
         self.finish(json.dumps({
             'uri': uri,
         }))
@@ -82,7 +96,10 @@ class LaunchHandler(APIHandler):
             return self.finish(json.dumps({}))
         process = state['process']
         terminate_process(process.pid)
-        del state['uri']
+        base_uri = state['base_uri']
+        if base_uri:
+            requests.delete('http://localhost:6000/api/routes' + base_uri)
+        del LAUNCH_STATE_BY_FOLDER[folder]
         self.finish(json.dumps({}))
 
 
@@ -90,6 +107,7 @@ class LogHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
+        # TODO: Specify which state (i.e. launch) to get
         folder = self.get_argument('folder').strip() or '.'
         try:
             state = LAUNCH_STATE_BY_FOLDER[folder]
@@ -109,6 +127,8 @@ def setup_handlers(web_app):
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
         (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
     ])
+    SERVER_FOLDER_BY_NAME['launch'] = Path(mkdtemp())
+    atexit.register(clean)
 
 
 def clean():
@@ -117,10 +137,10 @@ def clean():
         process_id = process.pid
         terminate_process(process_id)
         L.debug('terminating process %s for %s', process.pid, state)
-    rmtree(LOG_FOLDER)
+    for folder in SERVER_FOLDER_BY_NAME.values():
+        rmtree(folder)
 
 
 L = getLogger(__name__)
 LAUNCH_STATE_BY_FOLDER = {}
-LOG_FOLDER = Path(mkdtemp())
-atexit.register(clean)
+SERVER_FOLDER_BY_NAME = {}

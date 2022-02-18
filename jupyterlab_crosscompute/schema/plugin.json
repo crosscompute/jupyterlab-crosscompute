@@ -3,17 +3,6 @@
   "title": "jupyterlab-crosscompute",
   "description": "jupyterlab-crosscompute settings.",
   "type": "object",
-  "properties": {
-    "minimumLaunchPort": {
-      "title": "",
-      "description": "",
-      "default": 7000
-    },
-    "maximumLaunchPort": {
-      "title": "",
-      "description": "",
-      "default": 7100
-    }
-  },
+  "properties": {},
   "additionalProperties": false
 }

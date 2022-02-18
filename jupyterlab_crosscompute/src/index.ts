@@ -7,7 +7,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+// import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
 import { CommandIDs, IIntervalIds, COMMAND_CATEGORY } from './constant';
@@ -19,7 +19,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
   requires: [IFileBrowserFactory, ILabShell, IDocumentManager, ITranslator],
-  optional: [ICommandPalette, ISettingRegistry, ILayoutRestorer],
+  optional: [
+    ICommandPalette,
+    // ISettingRegistry,
+    ILayoutRestorer
+  ],
   activate: (
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
@@ -27,7 +31,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     docManager: IDocumentManager,
     translator: ITranslator,
     palette?: ICommandPalette,
-    settingRegistry?: ISettingRegistry,
+    // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
     const { commands, shell } = app;
@@ -94,16 +98,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
         formData.append('folder', folder);
         requestAPI<any>('launch', { method: 'DELETE', body: formData })
           .then(d => {
-            automationModel.launch.uri = '';
             automationModel.error = {};
-            automationModel.changed.emit();
           })
           .catch(d => {
             automationModel.error = d;
             automationModel.changed.emit();
           });
-        automationModel.launch.uri = '';
-        automationModel.launch.log = { text: '' };
+        delete automationModel.launch.isReady;
+        delete automationModel.launch.log;
         automationModel.changed.emit();
       }
     });
@@ -159,6 +161,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       */
     }
 
+    /*
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
@@ -169,6 +172,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           console.error(reason);
         });
     }
+    */
 
     if (restorer) {
       restorer.add(automationBody, automationBody.id);

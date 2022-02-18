@@ -212,7 +212,7 @@ const Launch = ({
   } else {
     link = (
       <a className="crosscompute-Link" href={uri} target="_blank">
-        {uri}
+        Automation Server
       </a>
     );
   }

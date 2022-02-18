@@ -13,8 +13,8 @@ export interface ILaunchState {
   version: string;
   batches: IBatchDefinition[];
   uri: string;
-  log: ILog;
-  isReady: boolean;
+  log: ILog | undefined;
+  isReady: boolean | undefined;
 }
 
 interface IBatchDefinition {
