@@ -4,7 +4,6 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 // import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -20,7 +19,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IFileBrowserFactory, ILabShell, IDocumentManager, ITranslator],
   optional: [
-    ICommandPalette,
     // ISettingRegistry,
     ILayoutRestorer
   ],
@@ -90,57 +88,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
         automationModel.changed.emit();
       }
     });
-    /*
-    commands.addCommand(START_RENDER_COMMAND, {
-      label: trans.__('Start Render Automation'),
-      execute: (args: any) => {
-        console.log(START_RENDER_COMMAND);
-      }
-    });
-    commands.addCommand(STOP_RENDER_COMMAND, {
-      label: trans.__('Stop Render Automation'),
-      execute: (args: any) => {
-        console.log(STOP_RENDER_COMMAND);
-      }
-    });
-    commands.addCommand(START_DEPLOY_COMMAND, {
-      label: trans.__('Start Deploy Automation'),
-      execute: (args: any) => {
-        console.log(START_DEPLOY_COMMAND);
-      }
-    });
-    commands.addCommand(STOP_DEPLOY_COMMAND, {
-      label: trans.__('Stop Deploy Automation'),
-      execute: (args: any) => {
-        console.log(STOP_DEPLOY_COMMAND);
-      }
-    });
-    */
-
-    if (palette) {
-      palette.addItem({
-        command: CommandIDs.launchStart,
-        category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: CommandIDs.launchStop,
-        category: COMMAND_CATEGORY
-      });
-      /*
-      palette.addItem({
-        command: START_RENDER_COMMAND, category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: STOP_RENDER_COMMAND, category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: START_DEPLOY_COMMAND, category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: STOP_DEPLOY_COMMAND, category: COMMAND_CATEGORY
-      });
-      */
-    }
 
     /*
     if (settingRegistry) {

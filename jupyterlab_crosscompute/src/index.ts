@@ -1,11 +1,12 @@
 import {
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+// import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { requestAPI } from './handler';
+import { AutomationBody } from './body';
+// import { requestAPI } from './handler';
 
 /**
  * Initialization data for the jupyterlab-crosscompute extension.
@@ -13,10 +14,20 @@ import { requestAPI } from './handler';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  optional: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settingRegistry: ISettingRegistry | null) => {
-    console.log('JupyterLab extension jupyterlab-crosscompute is activated!');
+  optional: [
+    // ISettingRegistry
+    ILayoutRestorer
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    // settingRegistry?: ISettingRegistry,
+    restorer?: ILayoutRestorer
+  ) => {
+    const { shell } = app;
+    const automationBody = new AutomationBody();
+    shell.add(automationBody, 'right', { rank: 1000 });
 
+    /*
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
@@ -37,6 +48,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
           `The jupyterlab_crosscompute server extension appears to be missing.\n${reason}`
         );
       });
+    */
+
+    if (restorer) {
+      restorer.add(automationBody, automationBody.id);
+    }
   }
 };
 
