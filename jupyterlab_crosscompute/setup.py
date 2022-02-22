@@ -13,7 +13,7 @@ HERE = Path(__file__).parent.resolve()
 pkg_json = json.loads((HERE / "package.json").read_bytes())
 
 # The name of the project
-name = "jupyterlab_crosscompute"
+name = "jupyterlab-crosscompute"
 
 lab_path = (HERE / pkg_json["jupyterlab"]["outputDir"])
 
@@ -57,7 +57,8 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     install_requires=[
-        "jupyter_server>=1.6,<2"
+        # "crosscompute>0.9.1",
+        "jupyter_server>=1.6,<2",
     ],
     zip_safe=False,
     include_package_data=True,
