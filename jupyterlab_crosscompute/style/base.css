@@ -16,9 +16,22 @@
   margin-top: 1em;
 }
 
+.crosscompute-AutomationInformationBody > * + * {
+  margin-top: 1em;
+}
+
 .crosscompute-AutomationName {
   font-size: large;
   font-weight: bold;
+}
+
+.crosscompute-BatchDefinitionsHeader {
+  font-weight: bold;
+}
+
+.crosscompute-BatchDefinitions ul {
+  list-style-type: none;
+  padding-left: 0;
 }
 
 .crosscompute-Link {

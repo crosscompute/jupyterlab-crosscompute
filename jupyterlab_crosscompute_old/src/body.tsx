@@ -1,48 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AutomationModel, ILaunchState } from './model';
 
-const AutomationControl = ({
-  model,
-  commands,
-  openPath,
-  openFolder
-}: {
-  model: AutomationModel;
-  commands: CommandRegistry;
-}): JSX.Element => {
-  if (error.message) {
-  } else if (launch.path) {
-    const { path, folder, name, version, batches } = launch;
-    const batchLinks = batches?.map((d, i) => (
-      <li key={i}>
-        <a
-          className="crosscompute-Link"
-          onClick={() => {
-            if (d.configuration) {
-              openPath(folder + '/' + d.configuration.path);
-            } else {
-              openFolder(d.folder);
-            }
-          }}
-        >
-          {d.name || d.folder}
-        </a>
-      </li>
-    ));
-    content = (
-        <div className="crosscompute-AutomationInformationBody">
-          {batchLinks && (
-            <div className="crosscompute-BatchDefinitions">
-              <div className="crosscompute-BatchDefinitionsHeader">
-                Batch Definitions
-              </div>
-              <ul>{batchLinks}</ul>
-            </div>
-          )}
-          <Launch state={launch} commands={commands} />
-        </div>
-    );
-};
+    <Launch state={launch} commands={commands} />
 
 const Launch = ({
   state,

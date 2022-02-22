@@ -91,7 +91,11 @@ const AutomationControl = ({
           openPath={openPath}
         />
       ) : (
-        <AutomationContent model={model} openPath={openPath} />
+        <AutomationContent
+          model={model}
+          openFolder={openFolder}
+          openPath={openPath}
+        />
       )}
       <AutomationReference />
     </>
@@ -142,9 +146,11 @@ const ErrorContent = ({
 
 const AutomationContent = ({
   model,
+  openFolder,
   openPath
 }: {
   model: AutomationModel;
+  openFolder: (folder: string) => void;
   openPath: (path: string) => void;
 }): JSX.Element => {
   const { launch } = model;
@@ -158,13 +164,56 @@ const AutomationContent = ({
         </div>
       </div>
       <div className="crosscompute-AutomationInformationBody">
-        <div>
-          <a className="crosscompute-Link" onClick={() => openPath(path)}>
-            Automation Configuration
-          </a>
-        </div>
+        <a className="crosscompute-Link" onClick={() => openPath(path)}>
+          Automation Configuration
+        </a>
+        <BatchDefinitionsContent
+          model={model}
+          openFolder={openFolder}
+          openPath={openPath}
+        />
       </div>
     </div>
+  );
+};
+
+const BatchDefinitionsContent = ({
+  model,
+  openFolder,
+  openPath
+}: {
+  model: AutomationModel;
+  openFolder: (folder: string) => void;
+  openPath: (path: string) => void;
+}): JSX.Element => {
+  const { launch } = model;
+  const { folder, batches } = launch;
+  return batches.length ? (
+    <div className="crosscompute-BatchDefinitions">
+      <div className="crosscompute-BatchDefinitionsHeader">
+        Batch Definitions
+      </div>
+      <ul>
+        {batches.map((d, i) => (
+          <li key={i}>
+            <a
+              className="crosscompute-Link"
+              onClick={() => {
+                if (d.configuration) {
+                  openPath(folder + '/' + d.configuration.path);
+                } else {
+                  openFolder(d.folder);
+                }
+              }}
+            >
+              {d.name || d.folder}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : (
+    <></>
   );
 };
 
