@@ -19,13 +19,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [ILabShell, IDocumentManager, ITranslator],
   activate: (
-    app: JupyterFrontEnd,
-    browserFactory: IFileBrowserFactory,
-    labShell: ILabShell,
-    docManager: IDocumentManager,
     translator: ITranslator,
-    palette?: ICommandPalette,
-    restorer?: ILayoutRestorer
   ) => {
     const browserModel = browserFactory.defaultBrowser.model;
     const automationBody = new AutomationBody(

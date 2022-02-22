@@ -1,47 +1,20 @@
-# TODO: Write script to check that ports in range are not being used
 import atexit
 import json
 import requests
 import subprocess
 import tornado
-from crosscompute.constants import Error
-from crosscompute.exceptions import (
-    CrossComputeConfigurationNotFoundError, CrossComputeError)
-from crosscompute.routines.automation import DiskAutomation
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
-from os.path import relpath
 from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
 from .constants import BASE_URI, NAMESPACE
 from .macros import find_open_port, terminate_process
-from .routines import get_automation_dictionary
 
 
 class LaunchHandler(APIHandler):
-
-    @tornado.web.authenticated
-    def get(self):
-        folder = self.get_argument('folder').strip() or '.'
-        try:
-            automation = DiskAutomation.load(folder)
-        except CrossComputeConfigurationNotFoundError as e:
-            self.set_status(404)
-            return self.finish(json.dumps({
-                'message': str(e),
-                'code': Error.CONFIGURATION_NOT_FOUND}))
-        except CrossComputeError as e:
-            self.set_status(422)
-            d = {'message': str(e)}
-            if hasattr(e, 'path'):
-                d['path'] = relpath(e.path)
-            return self.finish(json.dumps(d))
-        automation_dictionary = get_automation_dictionary(
-            automation, LAUNCH_STATE_BY_FOLDER)
-        return self.finish(json.dumps(automation_dictionary))
 
     @tornado.web.authenticated
     def post(self):
@@ -140,5 +113,4 @@ def clean():
 
 
 L = getLogger(__name__)
-LAUNCH_STATE_BY_FOLDER = {}
 SERVER_FOLDER_BY_NAME = {}

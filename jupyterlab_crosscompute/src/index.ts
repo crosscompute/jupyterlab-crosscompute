@@ -4,8 +4,9 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-// import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+// import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { AutomationBody } from './body';
 
@@ -15,7 +16,7 @@ import { AutomationBody } from './body';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  requires: [IFileBrowserFactory, ILabShell],
+  requires: [IFileBrowserFactory, ILabShell, IDocumentManager],
   optional: [
     // ISettingRegistry
     ILayoutRestorer
@@ -24,18 +25,21 @@ const plugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
     labShell: ILabShell,
+    docManager: IDocumentManager,
     // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
-    const { shell } = app;
-    const automationBody = new AutomationBody();
-    shell.add(automationBody, 'right', { rank: 1000 });
-
     const browserModel = browserFactory.defaultBrowser.model;
-    const refresh = () => automationBody.updateModel({ folder: browserModel.path });
-
+    const openFolder = (folder: string) => browserModel.cd(folder);
+    const openPath = (path: string) => docManager.openOrReveal(path);
+    const automationBody = new AutomationBody(openFolder, openPath);
+    const refresh = () =>
+      automationBody.updateModel({ folder: '/' + browserModel.path });
     browserModel.pathChanged.connect(refresh);
     labShell.layoutModified.connect(refresh);
+
+    const { shell } = app;
+    shell.add(automationBody, 'right', { rank: 1000 });
 
     /*
     if (settingRegistry) {

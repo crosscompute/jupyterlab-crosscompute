@@ -1,4 +1,3 @@
-import { CommandRegistry } from '@lumino/commands';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
@@ -8,72 +7,6 @@ import { CommandIDs, ErrorCode, logoIcon } from './constant';
 import { requestAPI } from './handler';
 import { AutomationModel, ILaunchState } from './model';
 
-export class AutomationBody extends ReactWidget {
-  constructor(
-    browserModel: FileBrowserModel,
-    docManager: IDocumentManager,
-    commands: CommandRegistry
-  ) {
-    super();
-    this._model = new AutomationModel();
-    this._browserModel = browserModel;
-    this._docManager = docManager;
-    this._commands = commands;
-
-    this.id = 'crosscompute-automation';
-    this.addClass('crosscompute-Automation');
-
-    const title = this.title;
-    title.icon = logoIcon;
-    title.caption = 'CrossCompute Automation';
-  }
-
-  render(): JSX.Element {
-    const openPath = (path: string) => this._docManager.openOrReveal(path);
-    const openFolder = (folder: string) => this._browserModel.cd(folder);
-    return (
-      <UseSignal signal={this._model.changed} initialSender={this._model}>
-        {() => (
-          <AutomationControl
-            model={this._model}
-            commands={this._commands}
-            openPath={openPath}
-            openFolder={openFolder}
-          />
-        )}
-      </UseSignal>
-    );
-  }
-
-  onUpdate(isDirty?: boolean): void {
-    if (isDirty) {
-      this._isDirty = true;
-    }
-    if (this.isHidden || !this._isDirty) {
-      return;
-    }
-    const folder = this._browserModel.path;
-    console.log('isDirty folder', folder);
-    requestAPI<any>('launch?folder=' + folder)
-      .then(d => {
-        this._model.launch = d;
-        this._model.error = {};
-        this._model.changed.emit();
-      })
-      .catch(d => {
-        this._model.error = d;
-        this._model.changed.emit();
-      });
-    this._isDirty = false;
-  }
-
-  private _model: AutomationModel;
-  private _browserModel: FileBrowserModel;
-  private _docManager: IDocumentManager;
-  private _commands: CommandRegistry;
-  private _isDirty = true;
-}
-
 const AutomationControl = ({
   model,
   commands,
@@ -81,42 +14,9 @@ const AutomationControl = ({
   openFolder
 }: {
   model: AutomationModel;
-  openPath: (path: string) => void;
-  openFolder: (folder: string) => void;
   commands: CommandRegistry;
 }): JSX.Element => {
-  const { launch, error } = model;
-
-  let content;
   if (error.message) {
-    const { message, code, path } = error;
-    switch (code) {
-      case ErrorCode.configurationNotFound: {
-        const automationFolder = launch.folder;
-        content = automationFolder ? (
-          <a
-            className="crosscompute-Link"
-            onClick={() => openFolder(automationFolder)}
-          >
-            {launch.name
-              ? `${launch.name} ${launch.version}`
-              : 'Automation Folder'}
-          </a>
-        ) : (
-          ''
-        );
-        break;
-      }
-      default: {
-        content = path ? (
-          <a className="crosscompute-Link" onClick={() => openPath(path)}>
-            {message}
-          </a>
-        ) : (
-          message
-        );
-      }
-    }
   } else if (launch.path) {
     const { path, folder, name, version, batches } = launch;
     const batchLinks = batches?.map((d, i) => (

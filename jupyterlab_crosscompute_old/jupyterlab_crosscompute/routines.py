@@ -1,17 +1,5 @@
-from os.path import relpath
-
-
 def get_automation_dictionary(automation, state_by_folder):
-    configuration_path = relpath(automation.path)
-    configuration = automation.configuration
-    automation_folder = relpath(automation.folder)
     state = state_by_folder.get(automation_folder, {})
-    automation_dictionary = {
-        'path': '/' + configuration_path,
-        'folder': '/' + automation_folder,
-        'name': configuration.get('name', ''),
-        'version': configuration.get('version', ''),
-    }
     print(automation.folder, automation_folder, automation_dictionary['folder'])
     if 'uri' in state:
         automation_dictionary.update({
