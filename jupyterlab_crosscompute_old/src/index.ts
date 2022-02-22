@@ -17,11 +17,7 @@ import { AutomationModel } from './model';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  requires: [IFileBrowserFactory, ILabShell, IDocumentManager, ITranslator],
-  optional: [
-    // ISettingRegistry,
-    ILayoutRestorer
-  ],
+  requires: [ILabShell, IDocumentManager, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
@@ -29,13 +25,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
     docManager: IDocumentManager,
     translator: ITranslator,
     palette?: ICommandPalette,
-    // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
-    const { commands, shell } = app;
     const browserModel = browserFactory.defaultBrowser.model;
-    const trans = translator.load('jupyterlab');
-    const automationModel = new AutomationModel();
     const automationBody = new AutomationBody(
       automationModel,
       browserModel,
@@ -45,7 +37,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     labShell.layoutModified.connect(() => automationBody.onUpdate());
     browserModel.pathChanged.connect(() => automationBody.onUpdate(true));
-    shell.add(automationBody, 'right', { rank: 1000 });
 
     commands.addCommand(CommandIDs.launchStart, {
       label: trans.__('Start Launch Automation'),
@@ -88,24 +79,3 @@ const plugin: JupyterFrontEndPlugin<void> = {
         automationModel.changed.emit();
       }
     });
-
-    /*
-    if (settingRegistry) {
-      settingRegistry
-        .load(plugin.id)
-        .then(settings => {
-          console.log('SETTINGS', settings.composite);
-        })
-        .catch(reason => {
-          console.error(reason);
-        });
-    }
-    */
-
-    if (restorer) {
-      restorer.add(automationBody, automationBody.id);
-    }
-  }
-};
-
-export default plugin;

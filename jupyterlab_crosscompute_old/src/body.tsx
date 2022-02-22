@@ -165,24 +165,6 @@ const AutomationControl = ({
   } else {
     content = '';
   }
-
-  const reference = (
-    <div className="crosscompute-AutomationReference">
-      <a
-        className="crosscompute-Link"
-        href="https://d.crosscompute.com"
-        target="_blank"
-      >
-        CrossCompute Documentation
-      </a>
-    </div>
-  );
-  return (
-    <>
-      {content}
-      {reference}
-    </>
-  );
 };
 
 const Launch = ({

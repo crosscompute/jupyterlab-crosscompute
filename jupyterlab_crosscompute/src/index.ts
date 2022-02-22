@@ -4,9 +4,10 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 // import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { AutomationBody } from './body';
-// import { requestAPI } from './handler';
+import { AutomationModel } from './model';
 
 /**
  * Initialization data for the jupyterlab-crosscompute extension.
@@ -14,17 +15,21 @@ import { AutomationBody } from './body';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
+  requires: [IFileBrowserFactory],
   optional: [
     // ISettingRegistry
     ILayoutRestorer
   ],
   activate: (
     app: JupyterFrontEnd,
+    browserFactory: IFileBrowserFactory,
     // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
     const { shell } = app;
-    const automationBody = new AutomationBody();
+    // const browserModel = browserFactory.defaultBrowser.model;
+    const automationModel = new AutomationModel();
+    const automationBody = new AutomationBody(automationModel);
     shell.add(automationBody, 'right', { rank: 1000 });
 
     /*
