@@ -2,7 +2,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CommandIDs, ErrorCode, logoIcon } from './constant';
 import { requestAPI } from './handler';
@@ -53,8 +53,9 @@ export class AutomationBody extends ReactWidget {
     if (this.isHidden || !this._isDirty) {
       return;
     }
-    const { path } = this._browserModel;
-    requestAPI<any>('launch?folder=' + path)
+    const folder = this._browserModel.path;
+    console.log('isDirty folder', folder);
+    requestAPI<any>('launch?folder=' + folder)
       .then(d => {
         this._model.launch = d;
         this._model.error = {};
@@ -191,7 +192,16 @@ const Launch = ({
   state: ILaunchState | Record<string, never>;
   commands: CommandRegistry;
 }): JSX.Element => {
-  const { uri, isReady, log } = state;
+  const { folder, uri } = state;
+  const [isReady, setIsReady] = useState(state.isReady);
+  const [log, setLog] = useState(state.log);
+  let launchIntervalId: number, logIntervalId: number;
+
+  const clearIntervals = () => {
+    console.log('clearIntervals');
+    clearInterval(launchIntervalId);
+    clearInterval(logIntervalId);
+  };
 
   const onClickStart = () => {
     commands.execute(CommandIDs.launchStart).catch(reason => {
@@ -202,7 +212,35 @@ const Launch = ({
     commands.execute(CommandIDs.launchStop).catch(reason => {
       console.error(`could not stop launch: ${reason}`);
     });
+    clearIntervals();
   };
+  console.log('RENDERING...', folder, uri, isReady, log);
+
+  useEffect(() => {
+    console.log('useEffect', isReady, uri);
+    if (isReady === false && uri) {
+      console.log('checking...');
+      launchIntervalId = setInterval(() => {
+        fetch(uri, { method: 'HEAD' }).then(() => {
+          console.log('ready');
+          setIsReady(true);
+          clearInterval(launchIntervalId);
+        });
+      }, 1000);
+    }
+    if (isReady !== undefined) {
+      console.log('logging...');
+      logIntervalId = setInterval(() => {
+        requestAPI<any>('log?folder=' + folder).then(d => {
+          console.log('log');
+          setLog({ text: d.text });
+        });
+      }, 3000);
+    }
+    return () => {
+      clearIntervals();
+    };
+  }, [isReady, uri]);
 
   let link;
   if (isReady === undefined) {
@@ -212,7 +250,7 @@ const Launch = ({
   } else {
     link = (
       <a className="crosscompute-Link" href={uri} target="_blank">
-        Automation Server
+        Development Server
       </a>
     );
   }

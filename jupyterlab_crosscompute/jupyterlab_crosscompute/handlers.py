@@ -45,46 +45,44 @@ class LaunchHandler(APIHandler):
 
     @tornado.web.authenticated
     def post(self):
-        request = self.request
-        headers = request.headers
-        origin = headers['Origin']
-        settings = self.settings
-        host = settings['serverapp'].ip
-        port = find_open_port()
         folder = self.get_argument('folder').strip() or '.'
-        log_path = SERVER_FOLDER_BY_NAME['launch'] / f'{port}.log'
-
-        if 'X-Forwarded-For' in headers:
-            # TODO: Accept other proxies
-            # TODO: Use random string instead of port
-            base_uri = BASE_URI + '/' + str(port)
-            requests.post('http://localhost:6000/api/routes' + base_uri, json={
-                'target': f'http://localhost:{port}'})
-            uri = f'{origin}{base_uri}'
-        else:
-            base_uri = ''
-            uri = f'http://{request.host_name}:{port}'
-
-        process = subprocess.Popen([
-            'crosscompute',
-            '--host', host or '*',
-            '--port', str(port),
-            '--no-browser',
-            '--origins', origin,
-            '--base-uri', base_uri,
-        ], cwd=folder, start_new_session=True, stdout=open(
-            log_path, 'wt'), stderr=subprocess.STDOUT)
         try:
             state = LAUNCH_STATE_BY_FOLDER[folder]
-            terminate_process(state['process'].pid)
+            uri = state['uri']
         except KeyError:
-            pass
-        LAUNCH_STATE_BY_FOLDER[folder] = {
-            'uri': uri, 'process': process, 'path': log_path,
-            'base_uri': base_uri}
-        self.finish(json.dumps({
-            'uri': uri,
-        }))
+            request = self.request
+            headers = request.headers
+            origin = headers['Origin']
+            settings = self.settings
+            port = find_open_port()
+            log_path = SERVER_FOLDER_BY_NAME['launch'] / f'{port}.log'
+
+            if 'X-Forwarded-For' in headers:
+                # TODO: Accept other proxies
+                # TODO: Use random string instead of port
+                base_uri = BASE_URI + '/' + str(port)
+                requests.post(
+                    'http://localhost:6000/api/routes' + base_uri,
+                    json={'target': f'http://localhost:{port}'})
+                uri = f'{origin}{base_uri}'
+            else:
+                base_uri = ''
+                uri = f'http://{request.host_name}:{port}'
+
+            process = subprocess.Popen([
+                'crosscompute',
+                '--host', settings['serverapp'].ip or '*',
+                '--port', str(port),
+                '--no-browser',
+                '--origins', origin,
+                '--base-uri', base_uri,
+            ], cwd=folder, start_new_session=True, stdout=open(
+                log_path, 'wt'), stderr=subprocess.STDOUT)
+            LAUNCH_STATE_BY_FOLDER[folder] = {
+                'uri': uri, 'process': process, 'path': log_path,
+                'base_uri': base_uri}
+        print(LAUNCH_STATE_BY_FOLDER)
+        self.finish(json.dumps({'uri': uri}))
 
     @tornado.web.authenticated
     def delete(self):

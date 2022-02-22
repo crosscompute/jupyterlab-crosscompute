@@ -6,7 +6,7 @@ export async function requestAPI<T>(
   init: RequestInit = {}
 ): Promise<T> {
   const settings = ServerConnection.makeSettings();
-  const requestUrl = URLExt.join(settings.baseUrl, 'crosscompute', endPoint);
+  const requestUrl = URLExt.join(settings.baseUrl, 'jupyterlab-crosscompute', endPoint);
 
   let response: Response;
   try {

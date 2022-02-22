@@ -12,18 +12,10 @@ def get_automation_dictionary(automation, state_by_folder):
         'name': configuration.get('name', ''),
         'version': configuration.get('version', ''),
     }
+    print(automation.folder, automation_folder, automation_dictionary['folder'])
     if 'uri' in state:
-        uri = state['uri']
-        try:
-            with open(state['path'], 'rt') as f:
-                log_text = f.read()
-        except OSError:
-            log_text = ''
         automation_dictionary.update({
-            'uri': uri,
-            # TODO: Consider isReady=False and re-check client side
-            'isReady': True,
-            'log': {'text': log_text},
+            'uri': state['uri'],
         })
     batch_definitions = []
     for batch_dictionary in configuration.get('batches', []):
