@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab-crosscompute",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CrossCompute Extensions for JupyterLab",
   "keywords": [
     "jupyter",
@@ -47,10 +47,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.1.0",
-    "@jupyterlab/settingregistry": "^3.1.0",
     "@jupyterlab/coreutils": "^5.1.0",
-    "@jupyterlab/services": "^6.1.0"
-
+    "@jupyterlab/filebrowser": "^3.2.8",
+    "@jupyterlab/services": "^6.1.0",
+    "@jupyterlab/settingregistry": "^3.1.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.1.0",
@@ -73,16 +73,16 @@
   "publishConfig": {
     "access": "public"
   },
-  "jupyterlab": { 
+  "jupyterlab": {
     "discovery": {
-        "server": {
-          "managers": [
-            "pip"
-          ],
-          "base": {
-            "name": "jupyterlab_crosscompute"
-          }
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "jupyterlab-crosscompute"
         }
+      }
     },
     "extension": true,
     "outputDir": "jupyterlab_crosscompute/labextension",
@@ -93,9 +93,6 @@
       "before-build-npm": [
         "python -m pip install jupyterlab~=3.1",
         "jlpm"
-      ],
-      "before-build-python": [
-        "jlpm clean:all"
       ]
     }
   }

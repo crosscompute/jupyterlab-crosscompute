@@ -1,163 +1,42 @@
 import {
-  ILabShell,
-  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-// import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
 
-import { CommandIDs, COMMAND_CATEGORY } from './constant';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { requestAPI } from './handler';
-import { AutomationBody } from './body';
-import { AutomationModel } from './model';
 
+/**
+ * Initialization data for the jupyterlab-crosscompute extension.
+ */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  requires: [IFileBrowserFactory, ILabShell, IDocumentManager, ITranslator],
-  optional: [
-    ICommandPalette,
-    // ISettingRegistry,
-    ILayoutRestorer
-  ],
-  activate: (
-    app: JupyterFrontEnd,
-    browserFactory: IFileBrowserFactory,
-    labShell: ILabShell,
-    docManager: IDocumentManager,
-    translator: ITranslator,
-    palette?: ICommandPalette,
-    // settingRegistry?: ISettingRegistry,
-    restorer?: ILayoutRestorer
-  ) => {
-    const { commands, shell } = app;
-    const browserModel = browserFactory.defaultBrowser.model;
-    const trans = translator.load('jupyterlab');
-    const automationModel = new AutomationModel();
-    const automationBody = new AutomationBody(
-      automationModel,
-      browserModel,
-      docManager,
-      commands
-    );
+  optional: [ISettingRegistry],
+  activate: (app: JupyterFrontEnd, settingRegistry: ISettingRegistry | null) => {
+    console.log('JupyterLab extension jupyterlab-crosscompute is activated!');
 
-    labShell.layoutModified.connect(() => automationBody.onUpdate());
-    browserModel.pathChanged.connect(() => automationBody.onUpdate(true));
-    shell.add(automationBody, 'right', { rank: 1000 });
-
-    commands.addCommand(CommandIDs.launchStart, {
-      label: trans.__('Start Launch Automation'),
-      execute: (args: any) => {
-        const folder = browserModel.path;
-        console.log('LAUNCH', folder);
-        const formData = new FormData();
-        formData.append('folder', folder);
-        requestAPI<any>('launch', { method: 'POST', body: formData })
-          .then(d => {
-            const { uri } = d;
-            automationModel.launch.uri = uri;
-            automationModel.changed.emit();
-          })
-          .catch(d => {
-            automationModel.error = d;
-            automationModel.changed.emit();
-          });
-        automationModel.launch.isReady = false;
-        automationModel.changed.emit();
-      }
-    });
-    commands.addCommand(CommandIDs.launchStop, {
-      label: trans.__('Stop Launch Automation'),
-      execute: (args: any) => {
-        const folder = browserModel.path;
-        console.log('LAUNCH', folder);
-        const formData = new FormData();
-        formData.append('folder', folder);
-        requestAPI<any>('launch', { method: 'DELETE', body: formData })
-          .then(d => {
-            automationModel.error = {};
-          })
-          .catch(d => {
-            automationModel.error = d;
-            automationModel.changed.emit();
-          });
-        delete automationModel.launch.log;
-        delete automationModel.launch.isReady;
-        automationModel.changed.emit();
-      }
-    });
-    /*
-    commands.addCommand(START_RENDER_COMMAND, {
-      label: trans.__('Start Render Automation'),
-      execute: (args: any) => {
-        console.log(START_RENDER_COMMAND);
-      }
-    });
-    commands.addCommand(STOP_RENDER_COMMAND, {
-      label: trans.__('Stop Render Automation'),
-      execute: (args: any) => {
-        console.log(STOP_RENDER_COMMAND);
-      }
-    });
-    commands.addCommand(START_DEPLOY_COMMAND, {
-      label: trans.__('Start Deploy Automation'),
-      execute: (args: any) => {
-        console.log(START_DEPLOY_COMMAND);
-      }
-    });
-    commands.addCommand(STOP_DEPLOY_COMMAND, {
-      label: trans.__('Stop Deploy Automation'),
-      execute: (args: any) => {
-        console.log(STOP_DEPLOY_COMMAND);
-      }
-    });
-    */
-
-    if (palette) {
-      palette.addItem({
-        command: CommandIDs.launchStart,
-        category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: CommandIDs.launchStop,
-        category: COMMAND_CATEGORY
-      });
-      /*
-      palette.addItem({
-        command: START_RENDER_COMMAND, category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: STOP_RENDER_COMMAND, category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: START_DEPLOY_COMMAND, category: COMMAND_CATEGORY
-      });
-      palette.addItem({
-        command: STOP_DEPLOY_COMMAND, category: COMMAND_CATEGORY
-      });
-      */
-    }
-
-    /*
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
         .then(settings => {
-          console.log('SETTINGS', settings.composite);
+          console.log('jupyterlab-crosscompute settings loaded:', settings.composite);
         })
         .catch(reason => {
-          console.error(reason);
+          console.error('Failed to load settings for jupyterlab-crosscompute.', reason);
         });
     }
-    */
 
-    if (restorer) {
-      restorer.add(automationBody, automationBody.id);
-    }
+    requestAPI<any>('get_example')
+      .then(data => {
+        console.log(data);
+      })
+      .catch(reason => {
+        console.error(
+          `The jupyterlab_crosscompute server extension appears to be missing.\n${reason}`
+        );
+      });
   }
 };
 
