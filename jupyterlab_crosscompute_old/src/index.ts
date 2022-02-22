@@ -1,39 +1,4 @@
-import {
-  ILabShell,
-  ILayoutRestorer,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-// import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
-
-import { CommandIDs, COMMAND_CATEGORY } from './constant';
-import { requestAPI } from './handler';
-import { AutomationBody } from './body';
-import { AutomationModel } from './model';
-
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab-crosscompute:plugin',
-  autoStart: true,
-  requires: [ILabShell, IDocumentManager, ITranslator],
-  activate: (
-    translator: ITranslator,
-  ) => {
-    const browserModel = browserFactory.defaultBrowser.model;
-    const automationBody = new AutomationBody(
-      automationModel,
-      browserModel,
-      docManager,
-      commands
-    );
-
-    labShell.layoutModified.connect(() => automationBody.onUpdate());
-    browserModel.pathChanged.connect(() => automationBody.onUpdate(true));
-
     commands.addCommand(CommandIDs.launchStart, {
-      label: trans.__('Start Launch Automation'),
       execute: (args: any) => {
         const folder = browserModel.path;
         console.log('LAUNCH', folder);
@@ -54,7 +19,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
       }
     });
     commands.addCommand(CommandIDs.launchStop, {
-      label: trans.__('Stop Launch Automation'),
       execute: (args: any) => {
         const folder = browserModel.path;
         console.log('LAUNCH', folder);
@@ -72,4 +36,3 @@ const plugin: JupyterFrontEndPlugin<void> = {
         delete automationModel.launch.isReady;
         automationModel.changed.emit();
       }
-    });

@@ -91,7 +91,7 @@ const AutomationControl = ({
           openPath={openPath}
         />
       ) : (
-        <AutomationContent model={model} />
+        <AutomationContent model={model} openPath={openPath} />
       )}
       <AutomationReference />
     </>
@@ -141,11 +141,31 @@ const ErrorContent = ({
 };
 
 const AutomationContent = ({
-  model
+  model,
+  openPath
 }: {
   model: AutomationModel;
+  openPath: (path: string) => void;
 }): JSX.Element => {
-  return <div></div>;
+  const { launch } = model;
+  const { path, name, version } = launch;
+  return (
+    <div className="crosscompute-AutomationInformation">
+      <div className="crosscompute-AutomationInformationHeader">
+        <div className="crosscompute-AutomationName">{name || 'No Name'}</div>
+        <div className="crosscompute-AutomationVersion">
+          {version || 'No Version'}
+        </div>
+      </div>
+      <div className="crosscompute-AutomationInformationBody">
+        <div>
+          <a className="crosscompute-Link" onClick={() => openPath(path)}>
+            Automation Configuration
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const AutomationReference = (): JSX.Element => {

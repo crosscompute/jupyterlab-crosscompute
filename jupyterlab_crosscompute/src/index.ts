@@ -52,16 +52,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
           console.error('Failed to load settings for jupyterlab-crosscompute.', reason);
         });
     }
-
-    requestAPI<any>('get_example')
-      .then(data => {
-        console.log(data);
-      })
-      .catch(reason => {
-        console.error(
-          `The jupyterlab_crosscompute server extension appears to be missing.\n${reason}`
-        );
-      });
     */
 
     if (restorer) {

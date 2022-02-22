@@ -1,10 +1,4 @@
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import React, { useEffect, useState } from 'react';
-
-import { CommandIDs, ErrorCode, logoIcon } from './constant';
-import { requestAPI } from './handler';
 import { AutomationModel, ILaunchState } from './model';
 
 const AutomationControl = ({
@@ -36,19 +30,7 @@ const AutomationControl = ({
       </li>
     ));
     content = (
-      <div className="crosscompute-AutomationInformation">
-        <div className="crosscompute-AutomationInformationHeader">
-          <div className="crosscompute-AutomationName">{name || 'No Name'}</div>
-          <div className="crosscompute-AutomationVersion">
-            {version || 'No Version'}
-          </div>
-        </div>
         <div className="crosscompute-AutomationInformationBody">
-          <div>
-            <a className="crosscompute-Link" onClick={() => openPath(path)}>
-              Automation Configuration
-            </a>
-          </div>
           {batchLinks && (
             <div className="crosscompute-BatchDefinitions">
               <div className="crosscompute-BatchDefinitionsHeader">
@@ -59,11 +41,7 @@ const AutomationControl = ({
           )}
           <Launch state={launch} commands={commands} />
         </div>
-      </div>
     );
-  } else {
-    content = '';
-  }
 };
 
 const Launch = ({

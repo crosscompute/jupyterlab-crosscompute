@@ -8,6 +8,19 @@
   overflow: auto;
 }
 
+.crosscompute-Automation > * + * {
+  margin-top: 1em;
+}
+
+.crosscompute-AutomationInformation > * + * {
+  margin-top: 1em;
+}
+
+.crosscompute-AutomationName {
+  font-size: large;
+  font-weight: bold;
+}
+
 .crosscompute-Link {
   color: var(--jp-content-link-color);
 }
