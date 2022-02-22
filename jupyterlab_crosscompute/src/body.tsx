@@ -6,9 +6,9 @@ import { logoIcon } from './constant';
 import { AutomationModel } from './model';
 
 export class AutomationBody extends ReactWidget {
-  constructor(model: AutomationModel) {
+  constructor() {
     super();
-    this._model = model;
+    this._model = new AutomationModel();
 
     this.id = 'crosscompute-automation';
     this.addClass('crosscompute-Automation');
@@ -18,15 +18,27 @@ export class AutomationBody extends ReactWidget {
     title.caption = 'CrossCompute Automation';
   }
 
+  updateModel(model: { folder: string }): void {
+    const { folder } = model;
+
+    let shouldUpdate = false;
+    if (this._model.folder !== folder) {
+      shouldUpdate = true;
+    }
+    if (this.isHidden || !shouldUpdate) {
+      return;
+    }
+
+    this._model.folder = folder;
+    this._model.changed.emit();
+    console.debug('AutomationBody.updateModel UPDATE');
+  }
+
   render(): JSX.Element {
-    console.log('RENDERING...', this._model);
+    console.debug('AutomationBody.render');
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
-        {() => (
-          <AutomationControl
-            model={this._model}
-          />
-        )}
+        {() => <AutomationControl model={this._model} />}
       </UseSignal>
     );
   }
@@ -39,7 +51,8 @@ const AutomationControl = ({
 }: {
   model: AutomationModel;
 }): JSX.Element => {
-  let content = '';
+  console.debug('AutomationControl.render');
+  const content = model.folder;
   const reference = (
     <div className="crosscompute-AutomationReference">
       <a

@@ -1,4 +1,5 @@
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -7,7 +8,6 @@ import {
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { AutomationBody } from './body';
-import { AutomationModel } from './model';
 
 /**
  * Initialization data for the jupyterlab-crosscompute extension.
@@ -15,7 +15,7 @@ import { AutomationModel } from './model';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   autoStart: true,
-  requires: [IFileBrowserFactory],
+  requires: [IFileBrowserFactory, ILabShell],
   optional: [
     // ISettingRegistry
     ILayoutRestorer
@@ -23,14 +23,19 @@ const plugin: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
+    labShell: ILabShell,
     // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
     const { shell } = app;
-    // const browserModel = browserFactory.defaultBrowser.model;
-    const automationModel = new AutomationModel();
-    const automationBody = new AutomationBody(automationModel);
+    const automationBody = new AutomationBody();
     shell.add(automationBody, 'right', { rank: 1000 });
+
+    const browserModel = browserFactory.defaultBrowser.model;
+    const refresh = () => automationBody.updateModel({ folder: browserModel.path });
+
+    browserModel.pathChanged.connect(refresh);
+    labShell.layoutModified.connect(refresh);
 
     /*
     if (settingRegistry) {

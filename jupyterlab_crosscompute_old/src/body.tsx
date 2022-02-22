@@ -10,13 +10,12 @@ import { AutomationModel, ILaunchState } from './model';
 
 export class AutomationBody extends ReactWidget {
   constructor(
-    model: AutomationModel,
     browserModel: FileBrowserModel,
     docManager: IDocumentManager,
     commands: CommandRegistry
   ) {
     super();
-    this._model = model;
+    this._model = new AutomationModel();
     this._browserModel = browserModel;
     this._docManager = docManager;
     this._commands = commands;
