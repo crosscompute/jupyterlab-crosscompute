@@ -167,17 +167,18 @@ const AutomationContent = ({
         <a className="crosscompute-Link" onClick={() => openPath(path)}>
           Automation Configuration
         </a>
-        <BatchDefinitionsContent
+        <BatchDefinitions
           model={model}
           openFolder={openFolder}
           openPath={openPath}
         />
+        <LaunchPanel model={model} />
       </div>
     </div>
   );
 };
 
-const BatchDefinitionsContent = ({
+const BatchDefinitions = ({
   model,
   openFolder,
   openPath
@@ -214,6 +215,73 @@ const BatchDefinitionsContent = ({
     </div>
   ) : (
     <></>
+  );
+};
+
+const LaunchPanel = ({ model }: { model: AutomationModel }): JSX.Element => {
+  const { launch } = model;
+  const { folder } = launch;
+  const { uri, isReady } = launch;
+  const formData = new FormData();
+  formData.append('folder', folder);
+
+  let launchIntervalId: number, logIntervalId: number;
+  const clearIntervals = () => {
+    clearInterval(launchIntervalId);
+    clearInterval(logIntervalId);
+  };
+
+  const onClickStart = () => {
+    launch.isReady = false;
+    model.changed.emit();
+    requestAPI<any>('launch', { method: 'POST', body: formData })
+      .then(d => {
+        const { uri } = d;
+        launch.uri = uri;
+        model.changed.emit();
+      })
+      .catch(d => {
+        model.error = d;
+        model.changed.emit();
+      });
+  };
+  const onClickStop = () => {
+    clearIntervals();
+    delete launch.isReady;
+    model.changed.emit();
+    requestAPI<any>('launch', { method: 'DELETE', body: formData }).catch(d => {
+      model.error = d;
+      model.changed.emit();
+    });
+  };
+
+  useEffect(() => {
+    if (isReady === false & uri) {
+      launchIntervalId = setInterval(() => {
+        fetch(uri, { method: 'HEAD' }).then(() => {
+        });
+      }, 1000);
+    }
+    if (isReady !== undefined) {
+    }
+  }, [isReady, uri]);
+
+  const link = '';
+  const button =
+    isReady === undefined ? (
+      <button onClick={onClickStart}>Launch</button>
+    ) : (
+      <button onClick={onClickStop}>Stop</button>
+    );
+  const information = '';
+  return (
+    <div className="crosscompute-LaunchPanel">
+      <div className="crosscompute-LaunchControl">
+        {link}
+        {button}
+      </div>
+      {information}
+    </div>
   );
 };
 

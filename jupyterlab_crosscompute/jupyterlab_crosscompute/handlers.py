@@ -1,15 +1,22 @@
+import atexit
 import json
+import requests
+import subprocess
 import tornado
-
 from crosscompute.constants import Error
 from crosscompute.exceptions import (
     CrossComputeConfigurationNotFoundError, CrossComputeError)
 from crosscompute.routines.automation import DiskAutomation
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
-from os.path import relpath
+from logging import getLogger
+from os.path import basename, relpath
+from pathlib import Path
+from shutil import rmtree
+from tempfile import mkdtemp
 
-from .constants import NAMESPACE
+from .constants import BASE_URI, ID_LENGTH, NAMESPACE
+from .macros import find_open_port, get_unique_id, terminate_process
 from .routines import get_automation_dictionary
 
 
@@ -22,25 +29,93 @@ class LaunchHandler(APIHandler):
             automation = DiskAutomation.load(relative_folder)
         except CrossComputeConfigurationNotFoundError as e:
             self.set_status(404)
-            return self.finish(json.dumps({
+            d = {
                 'message': str(e),
-                'code': Error.CONFIGURATION_NOT_FOUND}))
+                'code': Error.CONFIGURATION_NOT_FOUND,
+            }
         except CrossComputeError as e:
             self.set_status(422)
             d = {'message': str(e)}
             if hasattr(e, 'path'):
                 d['path'] = relpath(e.path)
-            return self.finish(json.dumps(d))
-        automation_dictionary = get_automation_dictionary(
-            automation, LAUNCH_STATE_BY_FOLDER)
-        return self.finish(json.dumps(automation_dictionary))
+        else:
+            d = get_automation_dictionary(
+                automation, LAUNCH_STATE_BY_FOLDER)
+        return self.finish(json.dumps(d))
+
+    @tornado.web.authenticated
+    def post(self):
+        relative_folder = self.get_argument('folder').strip('/ ')
+        try:
+            state = LAUNCH_STATE_BY_FOLDER[relative_folder]
+            uri = state['uri']
+        except KeyError:
+            request = self.request
+            headers = request.headers
+            port = find_open_port()
+            origin = headers['Origin']
+            if 'X-Forwarded-For' in headers:
+                # TODO: Accept other proxies
+                server_id = get_unique_id(ID_LENGTH, [basename(_[
+                    'base_uri']) for _ in LAUNCH_STATE_BY_FOLDER.values()])
+                base_uri = f'{BASE_URI}/{server_id}'
+                requests.post(
+                    'http://localhost:6000/api/routes' + base_uri,
+                    json={'target': f'http://localhost:{port}'})
+                uri = f'{origin}{base_uri}'
+            else:
+                base_uri = ''
+                uri = f'http://{request.host_name}:{port}'
+            log_path = TEMPORARY_FOLDER / 'launch' / f'{port}.log'
+            process = subprocess.Popen([
+                'crosscompute',
+                '--host', self.settings['serverapp'].ip or '*',
+                '--port', str(port),
+                '--no-browser', '--base-uri', base_uri, '--origins', origin,
+            ], cwd=relative_folder, start_new_session=True, stdout=open(
+                log_path, 'wt'), stderr=subprocess.STDOUT)
+            LAUNCH_STATE_BY_FOLDER[relative_folder] = {
+                'base_uri': base_uri, 'uri': uri, 'log_path': log_path,
+                'process': process}
+        self.finish(json.dumps({'uri': uri}))
+
+    @tornado.web.authenticated
+    def delete(self):
+        relative_folder = self.get_argument('folder').strip('/ ')
+        try:
+            state = LAUNCH_STATE_BY_FOLDER[relative_folder]
+        except KeyError:
+            self.set_status(404)
+        else:
+            base_uri = state['base_uri']
+            if base_uri:
+                requests.delete('http://localhost:6000/api/routes' + base_uri)
+            process = state['process']
+            terminate_process(process.pid)
+            del LAUNCH_STATE_BY_FOLDER[relative_folder]
+        self.finish(json.dumps({}))
 
 
 class LogHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.finish(json.dumps({'text': ''}))
+        relative_folder = self.get_argument('folder').strip('/ ')
+        log_type = self.get_argument('type').strip()
+        try:
+            state_by_folder = {
+                'launch': LAUNCH_STATE_BY_FOLDER,
+            }[log_type]
+            state = state_by_folder[relative_folder]
+        except KeyError:
+            self.set_status(404)
+            d = {}
+        else:
+            log_path = state['path']
+            with open(log_path, 'rt') as f:
+                log_text = f.read()
+            d = {'text': log_text}
+        self.finish(json.dumps(d))
 
 
 def setup_handlers(web_app):
@@ -48,8 +123,20 @@ def setup_handlers(web_app):
     base_url = web_app.settings['base_url']
     web_app.add_handlers(host_pattern, [
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
-        # (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
+        (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
     ])
+    atexit.register(clean)
+
+
+def clean():
+    for state in LAUNCH_STATE_BY_FOLDER.values():
+        process = state['process']
+        process_id = process.pid
+        terminate_process(process_id)
+        L.debug('terminating process %s for %s', process.pid, state)
+    rmtree(TEMPORARY_FOLDER)
 
 
 LAUNCH_STATE_BY_FOLDER = {}
+TEMPORARY_FOLDER = Path(mkdtemp())
+L = getLogger(__name__)

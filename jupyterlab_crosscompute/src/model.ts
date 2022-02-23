@@ -4,17 +4,17 @@ export class AutomationModel {
   // Folder used for most recent update
   folder: string | null = null;
 
-  // Error dictionary from extension server
+  // Error state from extension server
   error?: IAutomationError | Record<string, never> = {};
 
-  // Launch dictionary from extension server
+  // Launch state from extension server
   launch: ILaunchState | Record<string, never> = {};
 
   // Signal to refresh widget
   changed = new Signal<this, void>(this);
 }
 
-export interface ILaunchState {
+interface ILaunchState {
   // Path to automation configuration
   path: string;
 
@@ -30,13 +30,13 @@ export interface ILaunchState {
   // Batch definitions
   batches: IBatchDefinition[];
 
-  // URI of automation server
+  // URI to automation server
   uri: string;
 
-  // Log of automation server
+  // Log from automation server
   log?: ILog;
 
-  // Flag indicating whether server is rady
+  // Flag indicating whether server is ready
   isReady?: boolean;
 }
 
@@ -50,7 +50,7 @@ interface ILog {
   text: string;
 }
 
-export interface IAutomationError {
+interface IAutomationError {
   message: string;
   code: number;
   path: string;

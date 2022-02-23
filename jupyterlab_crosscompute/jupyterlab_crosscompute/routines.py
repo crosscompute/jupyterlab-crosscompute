@@ -3,15 +3,21 @@ from os.path import relpath
 
 def get_automation_dictionary(automation, state_by_folder):
     configuration = automation.configuration
-    automation_path = relpath(automation.path)
-    automation_folder = relpath(automation.folder)
+    jupyter_path = '/' + relpath(automation.path)
+    jupyter_folder = '/' + relpath(automation.folder)
     automation_dictionary = {
-        'path': '/' + automation_path,
-        'folder': '/' + automation_folder,
+        'path': jupyter_path,
+        'folder': jupyter_folder,
         'name': configuration.get('name', ''),
         'version': configuration.get('version', ''),
         'batches': get_batch_definitions(configuration),
     }
+    state = state_by_folder.get(jupyter_folder, {})
+    if 'uri' in state:
+        automation_dictionary.update({
+            'uri': state['uri'],
+            'isReady': False,
+        })
     return automation_dictionary
 
 

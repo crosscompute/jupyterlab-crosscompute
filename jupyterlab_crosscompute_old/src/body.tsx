@@ -1,43 +1,8 @@
+delete launch.log;
 import React, { useEffect, useState } from 'react';
-import { AutomationModel, ILaunchState } from './model';
-
-    <Launch state={launch} commands={commands} />
-
-const Launch = ({
-  state,
-  commands
-}: {
-  state: ILaunchState | Record<string, never>;
-  commands: CommandRegistry;
-}): JSX.Element => {
-  const { folder, uri } = state;
-  const [isReady, setIsReady] = useState(state.isReady);
-  const [log, setLog] = useState(state.log);
-  let launchIntervalId: number, logIntervalId: number;
-
-  const clearIntervals = () => {
-    console.log('clearIntervals');
-    clearInterval(launchIntervalId);
-    clearInterval(logIntervalId);
-  };
-
-  const onClickStart = () => {
-    commands.execute(CommandIDs.launchStart).catch(reason => {
-      console.error(`could not start launch: ${reason}`);
-    });
-  };
-  const onClickStop = () => {
-    commands.execute(CommandIDs.launchStop).catch(reason => {
-      console.error(`could not stop launch: ${reason}`);
-    });
-    clearIntervals();
-  };
-  console.log('RENDERING...', folder, uri, isReady, log);
 
   useEffect(() => {
-    console.log('useEffect', isReady, uri);
     if (isReady === false && uri) {
-      console.log('checking...');
       launchIntervalId = setInterval(() => {
         fetch(uri, { method: 'HEAD' }).then(() => {
           console.log('ready');
@@ -47,7 +12,6 @@ const Launch = ({
       }, 1000);
     }
     if (isReady !== undefined) {
-      console.log('logging...');
       logIntervalId = setInterval(() => {
         requestAPI<any>('log?folder=' + folder).then(d => {
           console.log('log');
@@ -86,14 +50,3 @@ const Launch = ({
     ) : (
       ''
     );
-
-  return (
-    <div className="crosscompute-Launch">
-      <div className="crosscompute-LaunchControl">
-        {link}
-        {button}
-      </div>
-      {information}
-    </div>
-  );
-};

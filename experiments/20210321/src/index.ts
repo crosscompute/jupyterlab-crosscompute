@@ -7,18 +7,6 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { requestAPI } from './crosscompute-jupyterlab-extensions';
 import RunAutomationButton from './RunAutomationButton';
 import { LogDialogWidget } from './DialogWidget';
-import {
-  COMMAND_PALETTE_CATEGORY,
-  RUN_AUTOMATION_COMMAND,
-  // RUN_AUTOMATION_POLLING_INTERVAL_IN_MILLISECONDS,
-} from './constants';
-
-const extension: JupyterFrontEndPlugin<void> = {
-  id: 'crosscompute-jupyterlab-extensions',
-  autoStart: true,
-  requires: [INotebookTracker, ICommandPalette],
-  activate,
-};
 
 function activate(
   app: JupyterFrontEnd,
@@ -45,9 +33,6 @@ function activate(
       LogDialogWidget(d.id);
     },
   });
-  // Add commands to command palette
-  const category = COMMAND_PALETTE_CATEGORY;
-  palette.addItem({ command: RUN_AUTOMATION_COMMAND, category });
   // Add widgets
   const runAutomationButton = new RunAutomationButton(app);
   app.docRegistry.addWidgetExtension('Notebook', runAutomationButton);
