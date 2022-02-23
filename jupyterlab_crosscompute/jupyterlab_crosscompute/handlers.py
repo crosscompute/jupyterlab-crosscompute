@@ -24,7 +24,7 @@ class LaunchHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        relative_folder = self.get_argument('folder').strip('/ ')
+        relative_folder = self.get_argument('folder').strip('/ ') or '.'
         try:
             automation = DiskAutomation.load(relative_folder)
         except CrossComputeConfigurationNotFoundError as e:
@@ -45,7 +45,7 @@ class LaunchHandler(APIHandler):
 
     @tornado.web.authenticated
     def post(self):
-        relative_folder = self.get_argument('folder').strip('/ ')
+        relative_folder = self.get_argument('folder').strip('/ ') or '.'
         try:
             state = LAUNCH_STATE_BY_FOLDER[relative_folder]
             uri = state['uri']
@@ -81,7 +81,7 @@ class LaunchHandler(APIHandler):
 
     @tornado.web.authenticated
     def delete(self):
-        relative_folder = self.get_argument('folder').strip('/ ')
+        relative_folder = self.get_argument('folder').strip('/ ') or '.'
         try:
             state = LAUNCH_STATE_BY_FOLDER[relative_folder]
         except KeyError:
@@ -101,7 +101,7 @@ class LogHandler(APIHandler):
     @tornado.web.authenticated
     def get(self):
         log_type = self.get_argument('type').strip()
-        relative_folder = self.get_argument('folder').strip('/ ')
+        relative_folder = self.get_argument('folder').strip('/ ') or '.'
         try:
             state_by_folder = {
                 'launch': LAUNCH_STATE_BY_FOLDER,
