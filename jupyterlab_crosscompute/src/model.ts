@@ -47,6 +47,7 @@ interface IBatchDefinition {
 }
 
 interface ILog {
+  timestamp: number;
   text: string;
 }
 

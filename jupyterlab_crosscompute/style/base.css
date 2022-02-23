@@ -8,6 +8,14 @@
   overflow: auto;
 }
 
+.crosscompute-Automation button {
+  font-size: medium;
+}
+
+.crosscompute-Automation button:hover {
+  color: var(--jp-ui-font-color1);
+}
+
 .crosscompute-Automation > * + * {
   margin-top: 1em;
 }
@@ -27,6 +35,19 @@
 
 .crosscompute-BatchDefinitionsHeader {
   font-weight: bold;
+}
+
+.crosscompute-LaunchControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.crosscompute-LaunchLog {
+  background: var(--jp-inverse-layout-color2);
+  color: var(--jp-ui-inverse-font-color0);
+  width: 100%;
+  overflow: auto;
 }
 
 .crosscompute-BatchDefinitions ul {

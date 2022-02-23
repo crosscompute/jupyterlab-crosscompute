@@ -1,6 +1,5 @@
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ErrorCode, logoIcon } from './constant';
 import { requestAPI } from './handler';
@@ -41,18 +40,14 @@ export class AutomationBody extends ReactWidget {
         delete this._model.error;
         this._model.launch = d;
         this._model.changed.emit();
-        console.debug('AutomationBody.updateModel OK');
       })
       .catch(d => {
         this._model.error = d;
         this._model.changed.emit();
-        console.debug('AutomationBody.updateModel ERROR');
       });
-    console.debug('AutomationBody.updateModel UPDATE');
   }
 
   render(): JSX.Element {
-    console.debug('AutomationBody.render');
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
         {() => (
@@ -80,7 +75,6 @@ const AutomationControl = ({
   openFolder: (folder: string) => void;
   openPath: (path: string) => void;
 }): JSX.Element => {
-  console.debug('AutomationControl.render');
   const { error } = model;
   return (
     <>
@@ -221,7 +215,7 @@ const BatchDefinitions = ({
 const LaunchPanel = ({ model }: { model: AutomationModel }): JSX.Element => {
   const { launch } = model;
   const { folder } = launch;
-  const { uri, isReady } = launch;
+  const { uri, log, isReady } = launch;
   const formData = new FormData();
   formData.append('folder', folder);
 
@@ -248,6 +242,7 @@ const LaunchPanel = ({ model }: { model: AutomationModel }): JSX.Element => {
   const onClickStop = () => {
     clearIntervals();
     delete launch.isReady;
+    delete launch.log;
     model.changed.emit();
     requestAPI<any>('launch', { method: 'DELETE', body: formData }).catch(d => {
       model.error = d;
@@ -256,24 +251,54 @@ const LaunchPanel = ({ model }: { model: AutomationModel }): JSX.Element => {
   };
 
   useEffect(() => {
-    if (isReady === false & uri) {
+    if (isReady === false && uri) {
       launchIntervalId = setInterval(() => {
         fetch(uri, { method: 'HEAD' }).then(() => {
+          launch.isReady = true;
+          model.changed.emit();
+          clearInterval(launchIntervalId);
         });
       }, 1000);
     }
     if (isReady !== undefined) {
+      logIntervalId = setInterval(() => {
+        requestAPI<any>('log?type=launch&folder=' + folder).then(d => {
+          if (launch.log?.timestamp !== d.timestamp) {
+            launch.log = d;
+            model.changed.emit();
+          }
+        });
+      }, 2000);
     }
+    return () => {
+      clearIntervals();
+    };
   }, [isReady, uri]);
 
-  const link = '';
+  let link;
+  if (isReady === undefined) {
+    link = '';
+  } else if (isReady === false) {
+    link = 'Launching...';
+  } else {
+    link = (
+      <a className="crosscompute-Link" href={uri} target="_blank">
+        Development Server
+      </a>
+    );
+  }
   const button =
     isReady === undefined ? (
       <button onClick={onClickStart}>Launch</button>
     ) : (
       <button onClick={onClickStop}>Stop</button>
     );
-  const information = '';
+  const information =
+    isReady !== undefined && log ? (
+      <pre className="crosscompute-LaunchLog">{log.text}</pre>
+    ) : (
+      ''
+    );
   return (
     <div className="crosscompute-LaunchPanel">
       <div className="crosscompute-LaunchControl">

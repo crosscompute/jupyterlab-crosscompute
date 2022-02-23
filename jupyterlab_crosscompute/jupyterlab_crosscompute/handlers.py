@@ -17,7 +17,7 @@ from tempfile import mkdtemp
 
 from .constants import BASE_URI, ID_LENGTH, NAMESPACE
 from .macros import find_open_port, get_unique_id, terminate_process
-from .routines import get_automation_dictionary
+from .routines import get_automation_dictionary, get_log_dictionary
 
 
 class LaunchHandler(APIHandler):
@@ -66,7 +66,7 @@ class LaunchHandler(APIHandler):
             else:
                 base_uri = ''
                 uri = f'http://{request.host_name}:{port}'
-            log_path = TEMPORARY_FOLDER / 'launch' / f'{port}.log'
+            log_path = FOLDER_BY_NAME['launch'] / f'{port}.log'
             process = subprocess.Popen([
                 'crosscompute',
                 '--host', self.settings['serverapp'].ip or '*',
@@ -100,8 +100,8 @@ class LogHandler(APIHandler):
 
     @tornado.web.authenticated
     def get(self):
-        relative_folder = self.get_argument('folder').strip('/ ')
         log_type = self.get_argument('type').strip()
+        relative_folder = self.get_argument('folder').strip('/ ')
         try:
             state_by_folder = {
                 'launch': LAUNCH_STATE_BY_FOLDER,
@@ -111,10 +111,7 @@ class LogHandler(APIHandler):
             self.set_status(404)
             d = {}
         else:
-            log_path = state['path']
-            with open(log_path, 'rt') as f:
-                log_text = f.read()
-            d = {'text': log_text}
+            d = get_log_dictionary(state)
         self.finish(json.dumps(d))
 
 
@@ -125,6 +122,9 @@ def setup_handlers(web_app):
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
         (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
     ])
+    root_folder = FOLDER_BY_NAME['root'] = Path(mkdtemp())
+    launch_folder = FOLDER_BY_NAME['launch'] = root_folder / 'launch'
+    launch_folder.mkdir()
     atexit.register(clean)
 
 
@@ -134,9 +134,9 @@ def clean():
         process_id = process.pid
         terminate_process(process_id)
         L.debug('terminating process %s for %s', process.pid, state)
-    rmtree(TEMPORARY_FOLDER)
+    rmtree(FOLDER_BY_NAME['root'])
 
 
 LAUNCH_STATE_BY_FOLDER = {}
-TEMPORARY_FOLDER = Path(mkdtemp())
+FOLDER_BY_NAME = {}
 L = getLogger(__name__)
