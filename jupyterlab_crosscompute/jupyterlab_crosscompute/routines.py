@@ -1,4 +1,4 @@
-from os.path import getmtime, relpath
+from os.path import getmtime, normpath, relpath
 
 
 def get_automation_dictionary(automation, state_by_folder):
@@ -6,8 +6,8 @@ def get_automation_dictionary(automation, state_by_folder):
     relative_path = relpath(automation.path)
     relative_folder = relpath(automation.folder)
     automation_dictionary = {
-        'path': '/' + relative_path,
-        'folder': '/' + relative_folder,
+        'path': normpath('/' + relative_path),
+        'folder': normpath('/' + relative_folder),
         'name': configuration.get('name', ''),
         'version': configuration.get('version', ''),
         'batches': get_batch_definitions(configuration),

@@ -72,7 +72,7 @@ class LaunchHandler(APIHandler):
                 '--host', self.settings['serverapp'].ip or '*',
                 '--port', str(port),
                 '--no-browser', '--base-uri', base_uri, '--origins', origin,
-            ], cwd=relative_folder, start_new_session=True, stdout=open(
+            ], cwd=relative_folder or '.', start_new_session=True, stdout=open(
                 log_path, 'wt'), stderr=subprocess.STDOUT)
             LAUNCH_STATE_BY_FOLDER[relative_folder] = {
                 'base_uri': base_uri, 'uri': uri, 'log_path': log_path,
