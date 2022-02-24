@@ -29,8 +29,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
-    const browserModel = browserFactory.defaultBrowser.model;
-    const openFolder = (folder: string) => browserModel.cd(folder);
+    const browser = browserFactory.defaultBrowser;
+    const browserModel = browser.model;
+    const openFolder = (folder: string) => {
+      labShell.activateById(browser.id);
+      browserModel.cd(folder);
+    }
     const openPath = (path: string) => docManager.openOrReveal(path);
     const automationBody = new AutomationBody(openFolder, openPath);
     const refresh = () =>
