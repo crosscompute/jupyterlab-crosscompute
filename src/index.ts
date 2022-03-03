@@ -29,6 +29,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
+    const { shell, commands } = app;
     const browser = browserFactory.defaultBrowser;
     const browserModel = browser.model;
     const openFolder = (folder: string) => {
@@ -36,13 +37,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
       browserModel.cd(folder);
     }
     const openPath = (path: string) => docManager.openOrReveal(path);
-    const automationBody = new AutomationBody(openFolder, openPath);
+    const automationBody = new AutomationBody(commands, openFolder, openPath);
     const refresh = () =>
       automationBody.updateModel({ folder: '/' + browserModel.path });
     browserModel.pathChanged.connect(refresh);
     labShell.layoutModified.connect(refresh);
 
-    const { shell } = app;
     shell.add(automationBody, 'right', { rank: 1000 });
 
     /*

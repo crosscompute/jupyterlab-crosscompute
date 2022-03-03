@@ -47,6 +47,7 @@
   background: var(--jp-inverse-layout-color2);
   color: var(--jp-ui-inverse-font-color0);
   width: 100%;
+  max-height: 50vh;
   overflow: auto;
 }
 

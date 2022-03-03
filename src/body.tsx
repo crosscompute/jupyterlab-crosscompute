@@ -1,4 +1,5 @@
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { CommandRegistry } from '@lumino/commands';
 import React, { useEffect } from 'react';
 
 import { ErrorCode, logoIcon } from './constant';
@@ -7,10 +8,12 @@ import { AutomationModel } from './model';
 
 export class AutomationBody extends ReactWidget {
   constructor(
+    commands: CommandRegistry,
     openFolder: (folder: string) => void,
     openPath: (folder: string) => void
   ) {
     super();
+    this._commands = commands;
     this._openFolder = openFolder;
     this._openPath = openPath;
     this._model = new AutomationModel();
@@ -53,6 +56,7 @@ export class AutomationBody extends ReactWidget {
         {() => (
           <AutomationControl
             model={this._model}
+            commands={this._commands}
             openFolder={this._openFolder}
             openPath={this._openPath}
           />
@@ -62,16 +66,19 @@ export class AutomationBody extends ReactWidget {
   }
 
   private _model: AutomationModel;
+  private _commands: CommandRegistry;
   private _openFolder: (folder: string) => void;
   private _openPath: (folder: string) => void;
 }
 
 const AutomationControl = ({
   model,
+  commands,
   openFolder,
   openPath
 }: {
   model: AutomationModel;
+  commands: CommandRegistry;
   openFolder: (folder: string) => void;
   openPath: (path: string) => void;
 }): JSX.Element => {
@@ -87,6 +94,7 @@ const AutomationControl = ({
       ) : (
         <AutomationContent
           model={model}
+          commands={commands}
           openFolder={openFolder}
           openPath={openPath}
         />
@@ -140,10 +148,12 @@ const ErrorContent = ({
 
 const AutomationContent = ({
   model,
+  commands,
   openFolder,
   openPath
 }: {
   model: AutomationModel;
+  commands: CommandRegistry;
   openFolder: (folder: string) => void;
   openPath: (path: string) => void;
 }): JSX.Element => {
@@ -166,7 +176,7 @@ const AutomationContent = ({
           openFolder={openFolder}
           openPath={openPath}
         />
-        <LaunchPanel model={model} />
+        <LaunchPanel model={model} commands={commands} />
       </div>
     </div>
   );
@@ -212,7 +222,13 @@ const BatchDefinitions = ({
   );
 };
 
-const LaunchPanel = ({ model }: { model: AutomationModel }): JSX.Element => {
+const LaunchPanel = ({
+  model,
+  commands
+}: {
+  model: AutomationModel;
+  commands: CommandRegistry;
+}): JSX.Element => {
   const { launch } = model;
   const { folder } = launch;
   const { uri, log, isReady } = launch;
@@ -226,6 +242,7 @@ const LaunchPanel = ({ model }: { model: AutomationModel }): JSX.Element => {
   };
 
   const onClickStart = () => {
+    commands.execute('docmanager:save-all');
     launch.isReady = false;
     model.changed.emit();
     requestAPI<any>('launch', { method: 'POST', body: formData })
