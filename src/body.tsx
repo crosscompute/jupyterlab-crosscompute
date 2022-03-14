@@ -332,7 +332,7 @@ const AutomationReference = (): JSX.Element => {
     <div className="crosscompute-AutomationReference">
       <a
         className="crosscompute-Link"
-        href="https://d.crosscompute.com"
+        href="https://docs.crosscompute.com"
         target="_blank"
       >
         CrossCompute Documentation
