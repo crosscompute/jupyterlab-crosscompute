@@ -1,23 +1,26 @@
 import atexit
 import json
-import requests
-import subprocess
 import tornado
 from crosscompute.constants import Error
 from crosscompute.exceptions import (
     CrossComputeConfigurationNotFoundError, CrossComputeError)
+from crosscompute.macros.web import find_open_port
 from crosscompute.routines.automation import DiskAutomation
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
-from os.path import basename, relpath
+from os.path import relpath
 from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from .constants import BASE_URI, ID_LENGTH, NAMESPACE
-from .macros import find_open_port, get_unique_id, terminate_process
-from .routines import get_automation_dictionary, get_log_dictionary
+from .constants import NAMESPACE
+from .macros import terminate_process
+from .routines import (
+    get_automation_dictionary,
+    get_log_dictionary,
+    make_launch_state,
+    remove_proxy_uri)
 
 
 class LaunchHandler(APIHandler):
@@ -50,33 +53,18 @@ class LaunchHandler(APIHandler):
             state = LAUNCH_STATE_BY_FOLDER[relative_folder]
             uri = state['uri']
         except KeyError:
-            request = self.request
-            headers = request.headers
-            port = find_open_port()
-            origin = headers['Origin']
-            if 'X-Forwarded-For' in headers:
-                # TODO: Accept other proxies
-                server_id = get_unique_id(ID_LENGTH, [basename(_[
-                    'base_uri']) for _ in LAUNCH_STATE_BY_FOLDER.values()])
-                base_uri = f'{BASE_URI}/{server_id}'
-                requests.post(
-                    'http://localhost:6000/api/routes' + base_uri,
-                    json={'target': f'http://localhost:{port}'})
-                uri = f'{origin}{base_uri}'
-            else:
-                base_uri = ''
-                uri = f'http://{request.host_name}:{port}'
-            log_path = FOLDER_BY_NAME['launch'] / f'{port}.log'
-            process = subprocess.Popen([
-                'crosscompute',
-                '--host', self.settings['serverapp'].ip or '*',
-                '--port', str(port),
-                '--no-browser', '--base-uri', base_uri, '--origins', origin,
-            ], cwd=relative_folder or '.', start_new_session=True, stdout=open(
-                log_path, 'wt'), stderr=subprocess.STDOUT)
-            LAUNCH_STATE_BY_FOLDER[relative_folder] = {
-                'base_uri': base_uri, 'uri': uri, 'log_path': log_path,
-                'process': process}
+            try:
+                port = find_open_port()
+            except OSError:
+                self.set_status(503)
+                return self.finish({})
+            host = self.settings['serverapp'].ip or '*'
+            log_folder = FOLDER_BY_NAME['launch']
+            launch_state = make_launch_state(
+                self.request, host, port, relative_folder, log_folder,
+                LAUNCH_STATE_BY_FOLDER.values())
+            LAUNCH_STATE_BY_FOLDER[relative_folder] = launch_state
+            uri = launch_state['uri']
         self.finish(json.dumps({'uri': uri}))
 
     @tornado.web.authenticated
@@ -87,9 +75,7 @@ class LaunchHandler(APIHandler):
         except KeyError:
             self.set_status(404)
         else:
-            base_uri = state['base_uri']
-            if base_uri:
-                requests.delete('http://localhost:6000/api/routes' + base_uri)
+            remove_proxy_uri(state['base_uri'])
             process = state['process']
             terminate_process(process.pid)
             del LAUNCH_STATE_BY_FOLDER[relative_folder]

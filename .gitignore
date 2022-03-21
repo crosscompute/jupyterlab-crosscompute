@@ -1,3 +1,4 @@
+package-lock.json
 *.bundle.*
 lib/
 node_modules/

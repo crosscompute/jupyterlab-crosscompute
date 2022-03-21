@@ -1,4 +1,9 @@
-from os.path import getmtime, relpath
+import requests
+import subprocess
+from os.path import basename, getmtime, relpath
+
+from .constants import BASE_URI, ID_LENGTH, PROXY_URI
+from .macros import get_unique_id
 
 
 def get_automation_dictionary(automation, state_by_folder):
@@ -48,3 +53,38 @@ def get_log_dictionary(state):
     else:
         log_text = state['log_text']
     return {'timestamp': log_timestamp, 'text': log_text}
+
+
+def make_launch_state(
+        request, host, port, automation_folder, log_folder, launch_states):
+    headers = request.headers
+    origin = headers['Origin']
+    if 'X-Forwarded-For' in headers:
+        server_ids = [basename(_['base_uri']) for _ in launch_states]
+        server_id = get_unique_id(ID_LENGTH, server_ids)
+        base_uri = f'{BASE_URI}/{server_id}'
+        add_proxy_uri(base_uri, f'http://localhost:{port}')
+        uri = f'{origin}{base_uri}'
+    else:
+        base_uri = ''
+        uri = f'http://{request.host_name}:{port}'
+    log_path = log_folder / f'{port}.log'
+    process = subprocess.Popen([
+        'crosscompute', '--host', host, '--port', str(port),
+        '--no-browser', '--base-uri', base_uri, '--origins', origin,
+    ], cwd=automation_folder, start_new_session=True, stdout=open(
+        log_path, 'wt'), stderr=subprocess.STDOUT)
+    return {
+        'base_uri': base_uri, 'uri': uri, 'log_path': log_path,
+        'process': process}
+
+
+def add_proxy_uri(external_uri, internal_uri):
+    # TODO: Accept other proxies
+    requests.post(PROXY_URI + external_uri, json={'target': internal_uri})
+
+
+def remove_proxy_uri(external_uri):
+    if not external_uri:
+        return
+    requests.delete(PROXY_URI + external_uri)
