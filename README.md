@@ -110,6 +110,6 @@ Thank you to [Salah Ahmed](https://github.com/salah93) for working on our first 
 
 Thank you to [Rodrigo Guarachi](https://github.com/rmguarachi) for working on our first JupyterLab extension and integration with the CrossCompute framework and platform.
 
-Thank you to [Kashfi Fahim](https://github.com/kashfifahim), [Noé Domínguez Porras](https://github.com/poguez), [Miguel Angel Gordián](https://github.com/zoek1) for testing our JupyterLab extension in different environments.
+Thank you to [Kashfi Fahim](https://github.com/kashfifahim), [Noé Domínguez Porras](https://github.com/poguez), [Miguel Angel Gordián](https://github.com/zoek1), [Olga Ryabtseva](https://www.linkedin.com/in/olga-creutzburg) for testing our JupyterLab extension in different environments.
 
 Thank you to Mary Rodriguez Gort of the Tampa Bay Innovation Center; Ji Yoon Lee, Tyler Doyle, Alex Hofmann of the American Public Power Association; Shaky Sherpa, Rhonda Jordan-Antoine of the World Bank; Ying Zhou of the Tech Incubator at Queens College for making this work possible.
