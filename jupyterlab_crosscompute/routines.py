@@ -2,7 +2,7 @@ import requests
 import subprocess
 from os.path import basename, getmtime, relpath
 
-from .constants import BASE_URI, ID_LENGTH, PROXY_URI
+from .constants import ROOT_URI, ID_LENGTH, PROXY_URI
 from .macros import get_unique_id
 
 
@@ -60,22 +60,22 @@ def make_launch_state(
     headers = request.headers
     origin = headers['Origin']
     if 'X-Forwarded-For' in headers:
-        server_ids = [basename(_['base_uri']) for _ in launch_states]
+        server_ids = [basename(_['root_uri']) for _ in launch_states]
         server_id = get_unique_id(ID_LENGTH, server_ids)
-        base_uri = f'{BASE_URI}/{server_id}'
-        add_proxy_uri(base_uri, f'http://localhost:{port}')
-        uri = f'{origin}{base_uri}'
+        root_uri = f'{ROOT_URI}/{server_id}'
+        add_proxy_uri(root_uri, f'http://localhost:{port}')
+        uri = f'{origin}{root_uri}'
     else:
-        base_uri = ''
+        root_uri = ''
         uri = f'http://{request.host_name}:{port}'
     log_path = log_folder / f'{port}.log'
     process = subprocess.Popen([
         'crosscompute', '--host', host, '--port', str(port),
-        '--no-browser', '--base-uri', base_uri, '--origins', origin,
+        '--no-browser', '--root-uri', root_uri, '--origins', origin,
     ], cwd=automation_folder, start_new_session=True, stdout=open(
         log_path, 'wt'), stderr=subprocess.STDOUT)
     return {
-        'base_uri': base_uri, 'uri': uri, 'log_path': log_path,
+        'root_uri': root_uri, 'uri': uri, 'log_path': log_path,
         'process': process}
 
 
