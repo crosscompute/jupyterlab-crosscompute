@@ -120,7 +120,10 @@ def clean():
         process_id = process.pid
         terminate_process(process_id)
         L.debug('terminating process %s for %s', process.pid, state)
-    rmtree(FOLDER_BY_NAME['root'])
+    try:
+        rmtree(FOLDER_BY_NAME['root'])
+    except OSError:
+        pass
 
 
 LAUNCH_STATE_BY_FOLDER = {}
