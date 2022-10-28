@@ -4,8 +4,8 @@ import tornado
 from crosscompute.constants import Error
 from crosscompute.exceptions import (
     CrossComputeConfigurationNotFoundError, CrossComputeError)
-from crosscompute.macros.web import find_open_port
 from crosscompute.routines.automation import DiskAutomation
+from invisibleroads_macros_web.port import find_open_port
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 from logging import getLogger
