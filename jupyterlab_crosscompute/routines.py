@@ -1,6 +1,7 @@
-import requests
 import subprocess
 from os.path import basename, getmtime, relpath
+
+import requests
 
 from .constants import ROOT_URI, ID_LENGTH, PROXY_URI
 from .macros import get_unique_id
@@ -68,6 +69,7 @@ def make_launch_state(
     else:
         root_uri = ''
         uri = f'http://{request.host_name}:{port}'
+    log_folder.mkdir(parents=True, exist_ok=True)
     log_path = log_folder / f'{port}.log'
     process = subprocess.Popen([
         'crosscompute', '--host', host, '--port', str(port),
