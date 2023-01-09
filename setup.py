@@ -58,8 +58,9 @@ setup_args = dict(
     packages=setuptools.find_packages(),
     install_requires=[
         "crosscompute>=0.9.2.10",
+        "invisibleroads-macros-disk>=1.2.1",
         "invisibleroads-macros-security>=1.0.2",
-        "invisibleroads-macros-web>=0.2.0",
+        "invisibleroads-macros-web>=0.2.2",
         "jupyter_server>=1.6,<2",
     ],
     zip_safe=False,

@@ -5,6 +5,7 @@ from crosscompute.constants import Error
 from crosscompute.exceptions import (
     CrossComputeConfigurationNotFoundError, CrossComputeError)
 from crosscompute.routines.automation import DiskAutomation
+from invisibleroads_macros_disk import make_random_folder
 from invisibleroads_macros_web.port import find_open_port
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
@@ -12,7 +13,6 @@ from logging import getLogger
 from os.path import relpath
 from pathlib import Path
 from shutil import rmtree
-from tempfile import mkdtemp
 
 from .constants import NAMESPACE
 from .macros import terminate_process
@@ -108,7 +108,7 @@ def setup_handlers(web_app):
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
         (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
     ])
-    root_folder = FOLDER_BY_NAME['root'] = Path(mkdtemp())
+    root_folder = FOLDER_BY_NAME['root'] = Path(make_random_folder())
     launch_folder = FOLDER_BY_NAME['launch'] = root_folder / 'launch'
     launch_folder.mkdir()
     atexit.register(clean)
