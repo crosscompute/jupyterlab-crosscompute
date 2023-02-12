@@ -75,7 +75,7 @@ class LaunchHandler(APIHandler):
         except KeyError:
             self.set_status(404)
         else:
-            remove_proxy_uri(state['root_path'])
+            remove_proxy_uri(state['root_uri'])
             process = state['process']
             terminate_process(process.pid)
             del LAUNCH_STATE_BY_FOLDER[relative_folder]
