@@ -74,7 +74,9 @@ def make_launch_state(
     process = subprocess.Popen([
         'crosscompute', '--host', host, '--port', str(port),
         '--no-browser', '--root-path', root_path, '--origins', origin,
-    ], cwd=automation_folder, start_new_session=True, stdout=open(
+    ], env={
+        'CROSSCOMPUTE_PORT_URI': uri,
+    }, cwd=automation_folder, start_new_session=True, stdout=open(
         log_path, 'wt'), stderr=subprocess.STDOUT)
     return {
         'root_path': root_path, 'uri': uri, 'log_path': log_path,
