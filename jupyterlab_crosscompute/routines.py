@@ -3,7 +3,7 @@ from os.path import basename, getmtime, relpath
 
 import requests
 
-from .constants import ROOT_URI, ID_LENGTH, PROXY_URI
+from .constants import ID_LENGTH, PROXY_URI, ROOT_URI
 from .macros import get_unique_id
 
 
@@ -59,13 +59,13 @@ def get_log_dictionary(state):
 def make_launch_state(
         request, host, port, automation_folder, log_folder, launch_states):
     headers = request.headers
-    origin = headers['Origin']
+    origin_uri = headers['Origin']
     if 'X-Forwarded-For' in headers:
         server_ids = [basename(_['root_uri']) for _ in launch_states]
         server_id = get_unique_id(ID_LENGTH, server_ids)
         root_uri = f'{ROOT_URI}/{server_id}'
         add_proxy_uri(root_uri, f'http://localhost:{port}')
-        uri = f'{origin}{root_uri}'
+        uri = f'{origin_uri}{root_uri}'
     else:
         root_uri = ''
         uri = f'http://{request.host_name}:{port}'
@@ -73,12 +73,12 @@ def make_launch_state(
     log_path = log_folder / f'{port}.log'
     with log_path.open('wt') as log_file:
         log_path.write(f'''\
-origin = {origin}
+origin = {origin_uri}
 root_uri = {root_uri}
 uri = {uri}''')
         command_terms = [
             'crosscompute', '--host', host, '--port', str(port),
-            '--no-browser', '--root-uri', root_uri, '--origins', origin]
+            '--no-browser', '--root-uri', root_uri, '--origins', origin_uri]
         process = subprocess.Popen(
             command_terms, cwd=automation_folder, start_new_session=True,
             stdout=log_file, stderr=subprocess.STDOUT)
