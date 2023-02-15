@@ -72,7 +72,7 @@ def make_launch_state(
     log_folder.mkdir(parents=True, exist_ok=True)
     log_path = log_folder / f'{port}.log'
     with log_path.open('wt') as log_file:
-        log_path.write(f'''\
+        log_file.write(f'''\
 origin = {origin_uri}
 root_uri = {root_uri}
 uri = {uri}''')
