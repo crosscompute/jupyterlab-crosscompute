@@ -71,11 +71,17 @@ def make_launch_state(
         uri = f'http://{request.host_name}:{port}'
     log_folder.mkdir(parents=True, exist_ok=True)
     log_path = log_folder / f'{port}.log'
-    process = subprocess.Popen([
-        'crosscompute', '--host', host, '--port', str(port),
-        '--no-browser', '--root-uri', root_uri, '--origins', origin,
-    ], cwd=automation_folder, start_new_session=True, stdout=open(
-        log_path, 'wt'), stderr=subprocess.STDOUT)
+    with log_path.open('wt') as log_file:
+        log_path.write(f'''\
+origin = {origin}
+root_uri = {root_uri}
+uri = {uri}''')
+        command_terms = [
+            'crosscompute', '--host', host, '--port', str(port),
+            '--no-browser', '--root-uri', root_uri, '--origins', origin]
+        process = subprocess.Popen(
+            command_terms, cwd=automation_folder, start_new_session=True,
+            stdout=log_file, stderr=subprocess.STDOUT)
     return {
         'root_uri': root_uri, 'uri': uri, 'log_path': log_path,
         'process': process}

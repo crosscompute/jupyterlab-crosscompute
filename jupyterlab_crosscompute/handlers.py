@@ -14,7 +14,7 @@ from os.path import relpath
 from pathlib import Path
 from shutil import rmtree
 
-from .constants import NAMESPACE
+from .constants import DEBUG_FOLDER, NAMESPACE
 from .macros import terminate_process
 from .routines import (
     get_automation_dictionary,
@@ -108,7 +108,8 @@ def setup_handlers(web_app):
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
         (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
     ])
-    root_folder = FOLDER_BY_NAME['root'] = Path(make_random_folder())
+    root_folder = FOLDER_BY_NAME['root'] = Path(
+        DEBUG_FOLDER or make_random_folder())
     launch_folder = FOLDER_BY_NAME['launch'] = root_folder / 'launch'
     launch_folder.mkdir()
     atexit.register(clean)
