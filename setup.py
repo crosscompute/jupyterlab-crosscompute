@@ -61,7 +61,7 @@ setup_args = dict(
         "invisibleroads-macros-disk>=1.2.1",
         "invisibleroads-macros-security>=1.0.2",
         "invisibleroads-macros-web>=0.2.2",
-        "jupyter_server>=1.6,<2",
+        "jupyter_server>=1.6",
     ],
     zip_safe=False,
     include_package_data=True,
