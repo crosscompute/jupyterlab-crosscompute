@@ -110,7 +110,7 @@ def setup_handlers(web_app):
     root_folder = FOLDER_BY_NAME['root'] = Path(
         DEBUG_FOLDER or make_random_folder())
     launch_folder = FOLDER_BY_NAME['launch'] = root_folder / 'launch'
-    launch_folder.mkdir()
+    launch_folder.mkdir(exist_ok=True)
     atexit.register(clean)
 
 

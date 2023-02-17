@@ -72,12 +72,9 @@ def make_launch_state(
     log_folder.mkdir(parents=True, exist_ok=True)
     log_path = log_folder / f'{port}.log'
     with log_path.open('wt') as log_file:
-        log_file.write(f'''\
-origin = {origin_uri}
-root_uri = {root_uri}
-uri = {uri}''')
         command_terms = [
             'crosscompute', '--host', host, '--port', str(port),
+            '--timestamp', '%M%S',
             '--no-browser', '--root-uri', root_uri, '--origins', origin_uri]
         process = subprocess.Popen(
             command_terms, cwd=automation_folder, start_new_session=True,
