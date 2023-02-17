@@ -106,8 +106,7 @@ def setup_handlers(web_app):
     base_url = web_app.settings['base_url']
     web_app.add_handlers(host_pattern, [
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
-        (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
-    ])
+        (url_path_join(base_url, NAMESPACE, 'log'), LogHandler)])
     root_folder = FOLDER_BY_NAME['root'] = Path(
         DEBUG_FOLDER or make_random_folder())
     launch_folder = FOLDER_BY_NAME['launch'] = root_folder / 'launch'
@@ -121,6 +120,8 @@ def clean():
         process_id = process.pid
         terminate_process(process_id)
         L.debug('terminating process %s for %s', process.pid, state)
+    if DEBUG_FOLDER:
+        return
     try:
         rmtree(FOLDER_BY_NAME['root'])
     except OSError:
