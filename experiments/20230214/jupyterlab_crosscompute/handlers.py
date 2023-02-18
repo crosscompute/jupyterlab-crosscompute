@@ -14,7 +14,7 @@ from os.path import relpath
 from pathlib import Path
 from shutil import rmtree
 
-from .constants import NAMESPACE
+from .constants import DEBUG_FOLDER, NAMESPACE
 from .macros import terminate_process
 from .routines import (
     get_automation_dictionary,
@@ -58,7 +58,7 @@ class LaunchHandler(APIHandler):
             except OSError:
                 self.set_status(503)
                 return self.finish({})
-            host = self.settings['serverapp'].ip or '*'
+            host = self.settings['serverapp'].ip or '0.0.0.0'
             log_folder = FOLDER_BY_NAME['launch']
             launch_state = make_launch_state(
                 self.request, host, port, relative_folder, log_folder,
@@ -106,11 +106,11 @@ def setup_handlers(web_app):
     base_url = web_app.settings['base_url']
     web_app.add_handlers(host_pattern, [
         (url_path_join(base_url, NAMESPACE, 'launch'), LaunchHandler),
-        (url_path_join(base_url, NAMESPACE, 'log'), LogHandler),
-    ])
-    root_folder = FOLDER_BY_NAME['root'] = Path(make_random_folder())
+        (url_path_join(base_url, NAMESPACE, 'log'), LogHandler)])
+    root_folder = FOLDER_BY_NAME['root'] = Path(
+        DEBUG_FOLDER or make_random_folder())
     launch_folder = FOLDER_BY_NAME['launch'] = root_folder / 'launch'
-    launch_folder.mkdir()
+    launch_folder.mkdir(exist_ok=True)
     atexit.register(clean)
 
 
@@ -120,6 +120,8 @@ def clean():
         process_id = process.pid
         terminate_process(process_id)
         L.debug('terminating process %s for %s', process.pid, state)
+    if DEBUG_FOLDER:
+        return
     try:
         rmtree(FOLDER_BY_NAME['root'])
     except OSError:
