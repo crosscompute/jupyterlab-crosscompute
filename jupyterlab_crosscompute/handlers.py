@@ -58,7 +58,7 @@ class LaunchHandler(APIHandler):
             except OSError:
                 self.set_status(503)
                 return self.finish({})
-            host = self.settings['serverapp'].ip or '*'
+            host = self.settings['serverapp'].ip or '0.0.0.0'
             log_folder = FOLDER_BY_NAME['launch']
             launch_state = make_launch_state(
                 self.request, host, port, relative_folder, log_folder,

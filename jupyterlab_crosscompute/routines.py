@@ -16,8 +16,7 @@ def get_automation_dictionary(automation, state_by_folder):
         'folder': '/' + relative_folder,
         'name': configuration.get('name', ''),
         'version': configuration.get('version', ''),
-        'batches': get_batch_definitions(configuration),
-    }
+        'batches': get_batch_definitions(configuration)}
     state = state_by_folder.get(relative_folder, {})
     if 'uri' in state:
         automation_dictionary.update({
@@ -76,6 +75,7 @@ def make_launch_state(
             'crosscompute', '--host', host, '--port', str(port),
             '--timestamp', '%M%S',
             '--no-browser', '--root-uri', root_uri, '--origins', origin_uri]
+        log_file.write(' '.join(command_terms) + '\n')
         process = subprocess.Popen(
             command_terms, cwd=automation_folder, start_new_session=True,
             stdout=log_file, stderr=subprocess.STDOUT)
