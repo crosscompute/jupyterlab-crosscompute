@@ -60,7 +60,7 @@ setup_args = dict(
         "crosscompute>=0.9.3",
         "invisibleroads-macros-disk>=1.3.0",
         "invisibleroads-macros-security>=1.0.3",
-        "invisibleroads-macros-web>=0.2.4",
+        "invisibleroads-macros-web>=0.3.0",
         "jupyter_server>=2.0",
     ],
     zip_safe=False,
