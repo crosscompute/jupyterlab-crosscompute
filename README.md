@@ -19,7 +19,7 @@ for the frontend extension.
 To install the extension, execute:
 
 ```bash
-pip install jupyterlab_crosscompute
+pip install jupyterlab-crosscompute
 ```
 
 ## Uninstall
