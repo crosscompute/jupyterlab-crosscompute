@@ -57,7 +57,7 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     install_requires=[
-        "crosscompute>=0.9.3",
+        "crosscompute>=0.9.4",
         "invisibleroads-macros-disk>=1.3.0",
         "invisibleroads-macros-security>=1.0.3",
         "invisibleroads-macros-web>=0.3.0",
@@ -72,9 +72,6 @@ setup_args = dict(
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Framework :: Jupyter",
         "Framework :: Jupyter :: JupyterLab",
