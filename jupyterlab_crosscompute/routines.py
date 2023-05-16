@@ -47,7 +47,7 @@ def get_log_dictionary(state):
     log_timestamp = getmtime(log_path)
     if state.get('log_timestamp') != log_timestamp:
         state['log_timestamp'] = log_timestamp
-        with open(log_path, 'rt') as f:
+        with log_path.open('rt') as f:
             log_text = f.read()
         state['log_text'] = log_text
     else:
