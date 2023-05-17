@@ -67,7 +67,7 @@
     "@jupyterlab/settingregistry": "^4.0.0-rc.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.6.3",
+    "@jupyterlab/builder": "^4.0.0",
     "@jupyterlab/testutils": "^4.0.0-rc.0",
     "@types/jest": "^29.2.0",
     "@types/json-schema": "^7.0.11",
