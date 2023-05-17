@@ -23,14 +23,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ],
   activate: (
     app: JupyterFrontEnd,
-    browserFactory: IFileBrowserFactory,
+    defaultBrowser: IFileBrowserFactory,
     labShell: ILabShell,
     docManager: IDocumentManager,
     // settingRegistry?: ISettingRegistry,
     restorer?: ILayoutRestorer
   ) => {
     const { shell, commands } = app;
-    const browser = browserFactory.defaultBrowser;
+    console.log(defaultBrowser);
+    const browser = defaultBrowser.createFileBrowser('defaultBrowser');
     const browserModel = browser.model;
     const openFolder = (folder: string) => {
       labShell.activateById(browser.id);
