@@ -24,7 +24,7 @@ export async function requestAPI<T>(
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
   } catch (error) {
-    throw new ServerConnection.NetworkError(<TypeError>error);
+    throw new ServerConnection.NetworkError(error);
   }
 
   const d = await response.json();
