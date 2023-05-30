@@ -1,0 +1,19 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.0.5
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: support@crosscompute.com
+author_name: CrossCompute Inc.
+data_format: string
+file_extension: ''
+has_binder: true
+has_settings: true
+kind: server
+labextension_name: jupyterlab-crosscompute
+mimetype: ''
+mimetype_name: ''
+project_short_description: CrossCompute Extensions for JupyterLab
+python_name: jupyterlab_crosscompute
+repository: https://github.com/crosscompute/jupyterlab-crosscompute
+test: true
+viewer_name: ''
+
