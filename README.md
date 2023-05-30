@@ -1,9 +1,9 @@
-# jupyterlab_crosscompute
+# CrossCompute Extensions for JupyterLab
 
 [![Github Actions Status](https://github.com/crosscompute/jupyterlab-crosscompute/workflows/Build/badge.svg)](https://github.com/crosscompute/jupyterlab-crosscompute/actions/workflows/build.yml)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/crosscompute/jupyterlab-crosscompute/main?urlpath=lab)
 CrossCompute Extensions for JupyterLab
 
-This extension is composed of a Python package named `jupyterlab_crosscompute`
+This extension is composed of a Python package named `jupyterlab-crosscompute`
 for the server extension and a NPM package named `jupyterlab-crosscompute`
 for the frontend extension.
 
@@ -16,7 +16,7 @@ for the frontend extension.
 To install the extension, execute:
 
 ```bash
-pip install jupyterlab_crosscompute
+pip install jupyterlab-crosscompute
 ```
 
 ## Uninstall
@@ -24,7 +24,7 @@ pip install jupyterlab_crosscompute
 To remove the extension, execute:
 
 ```bash
-pip uninstall jupyterlab_crosscompute
+pip uninstall jupyterlab-crosscompute
 ```
 
 ## Troubleshoot
@@ -88,7 +88,7 @@ jupyter lab build --minimize=False
 ```bash
 # Server extension must be manually disabled in develop mode
 jupyter server extension disable jupyterlab_crosscompute
-pip uninstall jupyterlab_crosscompute
+pip uninstall jupyterlab-crosscompute
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`

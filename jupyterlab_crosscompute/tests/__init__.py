@@ -1,1 +1,1 @@
-"""Python unit tests for jupyterlab_crosscompute."""
+"""Python unit tests for jupyterlab-crosscompute."""
