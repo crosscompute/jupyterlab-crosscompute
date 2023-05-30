@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab-crosscompute",
-  "version": "0.2.3.2",
+  "version": "0.2.4",
   "description": "CrossCompute Extensions for JupyterLab",
   "keywords": [
     "jupyter",
