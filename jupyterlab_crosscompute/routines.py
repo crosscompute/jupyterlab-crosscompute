@@ -73,7 +73,7 @@ def make_launch_state(
     with log_path.open('wt') as log_file:
         command_terms = [
             'crosscompute', '--host', host, '--port', str(port),
-            '--timestamp', '%M%S',
+            # '--timestamp', '%M%S',
             '--no-browser', '--root-uri', root_uri, '--origins', origin_uri]
         log_file.write(' '.join(command_terms) + '\n')
         process = subprocess.Popen(
