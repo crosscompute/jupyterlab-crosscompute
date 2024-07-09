@@ -1,0 +1,9 @@
+# vim
+*.sw[op]
+*~
+# transient
+*.log
+*.tmp
+*_data
+.DS_Store
+.~lock.*
