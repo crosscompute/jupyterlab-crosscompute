@@ -5,6 +5,8 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { Widget } from '@lumino/widgets';
+
 import { requestAPI } from './handler';
 
 /**
@@ -15,17 +17,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
   optional: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settingRegistry: ISettingRegistry | null) => {
-    console.log('JupyterLab extension jupyterlab-crosscompute is activated!');
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    const { shell } = app;
+    const exampleWidget: ExampleWidget = new ExampleWidget();
+    shell.add(exampleWidget, 'right', { rank: 1000 });
 
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
         .then(settings => {
-          console.log('jupyterlab-crosscompute settings loaded:', settings.composite);
+          console.log('loaded:', settings.composite);
         })
         .catch(reason => {
-          console.error('Failed to load settings for jupyterlab-crosscompute.', reason);
+          console.error('Failed load settings', reason);
         });
     }
 
@@ -40,5 +47,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
       });
   }
 };
+
+class ExampleWidget extends Widget {
+  constructor() {
+    super();
+    this.id = 'uhoh';
+    const x = document.createElement('div');
+    x.innerText = 'hey';
+    this.node.appendChild(x);
+  }
+}
 
 export default plugin;
