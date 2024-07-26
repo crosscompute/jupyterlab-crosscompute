@@ -1,20 +1,18 @@
 import {
+  ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { Widget } from '@lumino/widgets';
-
 import { requestAPI } from './handler';
-
-import { logoIcon } from './constant';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
+import { ExampleWidget } from './body';
 
 /**
  * Initialization data for the jupyterlab-crosscompute extension.
@@ -23,36 +21,48 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
-  requires: [IFileBrowserFactory, IDocumentManager],
+  requires: [IFileBrowserFactory, IDocumentManager, ILabShell],
   optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     browserFactory: IFileBrowserFactory,
     docManager: IDocumentManager,
+    labShell: ILabShell,
     settingRegistry: ISettingRegistry | null
   ) => {
     const { shell } = app;
-    const exampleWidget: ExampleWidget = new ExampleWidget();
 
     const browser = browserFactory.createFileBrowser('my-browser');
     const browserModel = browser.model;
 
-    // Run when user open a file
-    const refresh = () => {
-        console.log('/' + browserModel.path)
-        const items = browserModel.items();
+    const openFolder = (folder: string) => {
+      labShell.activateById(browser.id);
+      browserModel.cd(folder);
+    };
 
-        console.log('Show all items in cur dir');
-        for (const item of items) {
-        console.log(item.name);
-        }
-    }
+    const openPath = (path: string) => docManager.openOrReveal(path);
+
+    const exampleWidget: ExampleWidget = new ExampleWidget(
+      openFolder,
+      openPath
+    );
+
+    // Run when user opens a file
+    const refresh = () => {
+      // exampleWidget.updateModel({ folder: '/' + browserModel.path });
+      // exampleWidget.goToDir('/src')
+      console.log('/' + browserModel.path);
+
+      const items = browserModel.items;
+
+      console.log('All items in cur dir');
+      for (const item in items) console.log(item);
+    };
 
     browserModel.pathChanged.connect(refresh);
-    shell.currentChanged?.connect(refresh);
-      
+    labShell.layoutModified.connect(refresh);
+
     shell.add(exampleWidget, 'right', { rank: 1000 });
-    
 
     if (settingRegistry) {
       settingRegistry
@@ -61,7 +71,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           console.log('loaded:', settings.composite);
         })
         .catch(reason => {
-          console.error('Failed load settings', reason);
+          console.error('Failed to load settings', reason);
         });
     }
 
@@ -76,18 +86,5 @@ const plugin: JupyterFrontEndPlugin<void> = {
       });
   }
 };
-
-class ExampleWidget extends Widget {
-  constructor() {
-    super();
-    this.id = 'uhoh';
-    const x = document.createElement('div');
-    x.innerText = 'hey';
-    this.node.appendChild(x);
-
-    const title = this.title;
-    title.icon = logoIcon;
-  }
-}
 
 export default plugin;
