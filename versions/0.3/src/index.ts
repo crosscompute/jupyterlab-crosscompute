@@ -42,6 +42,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const openPath = (path: string) => docManager.openOrReveal(path);
 
+
+    // console.log(browserFactory.tracker.currentWidget?.model.path)
+    
     const exampleWidget: ExampleWidget = new ExampleWidget(
       openFolder,
       openPath
@@ -66,6 +69,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     };
     const g = () => {
       console.log('layoutModified');
+      console.log(browserFactory.tracker.currentWidget?.model.path)
+
     };
 
     // browserModel.pathChanged.connect(refresh);
