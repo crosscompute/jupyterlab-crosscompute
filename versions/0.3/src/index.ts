@@ -8,7 +8,10 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { requestAPI } from './handler';
 
-import { IFileBrowserFactory, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IFileBrowserFactory,
+  IDefaultFileBrowser
+} from '@jupyterlab/filebrowser';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -21,7 +24,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
-  requires: [IFileBrowserFactory, IDefaultFileBrowser, IDocumentManager, ILabShell],
+  requires: [
+    IFileBrowserFactory,
+    IDefaultFileBrowser,
+    IDocumentManager,
+    ILabShell
+  ],
   optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
@@ -32,6 +40,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     const { shell } = app;
+    console.log('app', app);
+    console.log('browserFactory', browserFactory);
+    console.log('defaultFileBrowser', defaultFileBrowser);
+    console.log('docManager', docManager);
+    console.log('labShell', labShell);
+    console.log('settingRegistry', settingRegistry);
 
     // const browser = browserFactory.createFileBrowser('my-browser');
     // const browserModel = browser.model;
@@ -39,11 +53,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const openFolder = (folder: string) => {
       // labShell.activateById(browser.id);
       // browserModel.cd(folder);
-        console.log('Hello');
+      console.log('Hello');
     };
 
     const openPath = (path: string) => docManager.openOrReveal(path);
-
     
     const exampleWidget: ExampleWidget = new ExampleWidget(
       openFolder,
@@ -73,7 +86,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     });
     }
 
-    
+   
     // browserFactory.tracker.widgetAdded.connect((sender: any, widget: any) => {
     //   // Notify the instance tracker if restore data needs to update.
     //   widget.context.pathChanged.connect(() => {
