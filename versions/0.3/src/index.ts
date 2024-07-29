@@ -64,7 +64,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
     };
     */
 
-    console.log(defaultFileBrowser);
       if (defaultFileBrowser)
       {
           void Promise.all([app.restored, defaultFileBrowser.model.restored]).then(() => {
@@ -72,7 +71,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
             console.log('Detect Path changed');
     	});
     });
-      }
+    }
 
     
     // browserFactory.tracker.widgetAdded.connect((sender: any, widget: any) => {
