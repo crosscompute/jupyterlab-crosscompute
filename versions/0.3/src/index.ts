@@ -47,20 +47,31 @@ const plugin: JupyterFrontEndPlugin<void> = {
       openPath
     );
 
+    /*
     // Run when user opens a file
     const refresh = () => {
       // exampleWidget.updateModel({ folder: '/' + browserModel.path });
       // exampleWidget.goToDir('/src')
       console.log('/' + browserModel.path);
 
-      const items = browserModel.items;
+      // const items = browserModel.items;
 
       console.log('All items in cur dir');
-      for (const item in items) console.log(item);
+      // for (const item in items) console.log(item);
+    };
+    */
+
+    const f = () => {
+      console.log('pathChanged');
+    };
+    const g = () => {
+      console.log('layoutModified');
     };
 
-    browserModel.pathChanged.connect(refresh);
-    labShell.layoutModified.connect(refresh);
+    // browserModel.pathChanged.connect(refresh);
+    // labShell.layoutModified.connect(refresh);
+    browserModel.pathChanged.connect(f);
+    labShell.layoutModified.connect(g);
 
     shell.add(exampleWidget, 'right', { rank: 1000 });
 
