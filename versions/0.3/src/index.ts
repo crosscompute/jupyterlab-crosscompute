@@ -21,7 +21,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
-  requires: [IDefaultFileBrowser, IFileBrowserFactory, IDocumentManager, ILabShell],
+  requires: [IFileBrowserFactory, IDefaultFileBrowser, IDocumentManager, ILabShell],
   optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
@@ -65,11 +65,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
     */
 
     console.log(defaultFileBrowser);
-    // void Promise.all([app.restored, defaultFileBrowser.model.restored]).then(() => {
-    // 	defaultFileBrowser.model.pathChanged.connect((sender, args) => {
-    //         console.log('Detect Path changed');
-    // 	});
-    // });
+      if (defaultFileBrowser)
+      {
+          void Promise.all([app.restored, defaultFileBrowser.model.restored]).then(() => {
+    	defaultFileBrowser.model.pathChanged.connect((sender, args) => {
+            console.log('Detect Path changed');
+    	});
+    });
+      }
 
     
     // browserFactory.tracker.widgetAdded.connect((sender: any, widget: any) => {
@@ -86,8 +89,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // };
     const g = () => {
       console.log('layoutModified');
-      console.log(browserFactory.tracker.currentWidget?.model.path);
-      console.log(browserFactory.tracker.currentWidget?.selectedItems().next().value);
+      // console.log(browserFactory.tracker.currentWidget?.model.path);
+      // console.log(browserFactory.tracker.currentWidget?.selectedItems().next().value);
     };
 
     // console.log('check browserFactory currentWidget', browserFactory.tracker.currentWidget);
