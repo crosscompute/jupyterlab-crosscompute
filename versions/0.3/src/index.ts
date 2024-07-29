@@ -77,16 +77,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
     };
     */
 
-      if (defaultFileBrowser)
-      {
-          void Promise.all([app.restored, defaultFileBrowser.model.restored]).then(() => {
-    	defaultFileBrowser.model.pathChanged.connect((sender, args) => {
-            console.log('Detect Path changed');
-    	});
-    });
-    }
+    //   if (defaultFileBrowser)
+    //   {
+    //       void Promise.all([app.restored, defaultFileBrowser.model.restored]).then(() => {
+    // 	defaultFileBrowser.model.pathChanged.connect((sender, args) => {
+    //         console.log('Detect Path changed');
+    // 	});
+    // });
+    // }
 
-   
+    labShell.currentPathChanged.connect(() => {
+    // tracker.save(widget);
+      console.log('From labShell, Detect path changed');
+      console.log('labShell:', labShell.currentPath);
+
+      });
+      
     // browserFactory.tracker.widgetAdded.connect((sender: any, widget: any) => {
     //   // Notify the instance tracker if restore data needs to update.
     //   widget.context.pathChanged.connect(() => {
