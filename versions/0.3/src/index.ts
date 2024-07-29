@@ -69,9 +69,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
     };
     const g = () => {
       console.log('layoutModified');
-      console.log(browserFactory.tracker.currentWidget?.model.path)
-
+      console.log(browserFactory.tracker.currentWidget?.model.path);
+      console.log(browserFactory.tracker.currentWidget?.selectedItems().next().value);
     };
+
+    console.log('check browserFactory currentWidget', browserFactory.tracker.currentWidget);
 
     // browserModel.pathChanged.connect(refresh);
     // labShell.layoutModified.connect(refresh);
