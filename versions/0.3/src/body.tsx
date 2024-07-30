@@ -29,21 +29,26 @@ export class CrossComputePanel extends ReactWidget {
     this._curFile = '';
     this._curDir = '';
     this._config = {
-      'name': '',
-      'version': ''
+      name: '',
+      version: ''
     };
   }
   render(): JSX.Element {
+    const onClickLaunch = () => {
+      console.log('hey');
+    };
+
     // return <TestComponent />;
     return (
       <UseSignal signal={this._stateChanged}>
         {(): JSX.Element => (
           <div>
-            <div>Currrent File: {this._curFile}</div>
-            <div>Currrent Dir: {this._curDir}</div>
+            <div>Current File: {this._curFile}</div>
+            <div>Current Dir: {this._curDir}</div>
             <div>Config:</div>
             <div>Name: {this._config.name}</div>
             <div>Version: {this._config.version}</div>
+            <button onClick={onClickLaunch}>Launch</button>
           </div>
         )}
       </UseSignal>
@@ -60,7 +65,7 @@ export class CrossComputePanel extends ReactWidget {
       .then(data => {
         this._config = data;
         console.log(data);
-        this._stateChanged.emit(); 
+        this._stateChanged.emit();
       })
       .catch(reason => {
         console.error(
