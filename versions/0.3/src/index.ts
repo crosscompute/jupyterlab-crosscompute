@@ -18,6 +18,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     console.log('app', app);
     const { shell } = app;
+    const panel: CrossComputePanel = new CrossComputePanel();
 
     // Change focus when user opens different files
     labShell.currentPathChanged.connect((sender, args) => {
@@ -32,13 +33,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
           'defaultFileBrowser pathChanged',
           defaultFileBrowser.model.path
         );
+        panel.updatePath(defaultFileBrowser.model.path, '');
       });
       // });
     }
     // labShell.activeChanged.connect(f);
     // labShell.currentChanged.connect(f);
     // labShell.layoutModified.connect(f);
-    const panel: CrossComputePanel = new CrossComputePanel();
     shell.add(panel, 'right', { rank: 700 });
   }
 };
