@@ -18,6 +18,7 @@ const TestComponent = (): JSX.Element => {
 export class CrossComputePanel extends ReactWidget {
   private _curFile;
   private _curDir;
+  private _config;
   constructor() {
     super();
     this.id = 'widget-id';
@@ -27,6 +28,10 @@ export class CrossComputePanel extends ReactWidget {
     title.icon = logoIcon;
     this._curFile = '';
     this._curDir = '';
+    this._config = {
+      'name': '',
+      'version': ''
+    };
   }
   render(): JSX.Element {
     // return <TestComponent />;
@@ -36,6 +41,9 @@ export class CrossComputePanel extends ReactWidget {
           <div>
             <div>Currrent File: {this._curFile}</div>
             <div>Currrent Dir: {this._curDir}</div>
+            <div>Config:</div>
+            <div>Name: {this._config.name}</div>
+            <div>Version: {this._config.version}</div>
           </div>
         )}
       </UseSignal>
@@ -48,10 +56,11 @@ export class CrossComputePanel extends ReactWidget {
 
     console.log('Updated curFile:', this._curFile);
     console.log('Updated curDir:', this._curDir);
-    this._stateChanged.emit();
     requestAPI<any>('get-example?path=' + this._curFile)
       .then(data => {
+        this._config = data;
         console.log(data);
+        this._stateChanged.emit(); 
       })
       .catch(reason => {
         console.error(
