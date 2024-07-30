@@ -16,24 +16,24 @@ const plugin: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell,
     defaultFileBrowser: IDefaultFileBrowser
   ) => {
-    console.log('app', app);
     const { shell } = app;
     const panel: CrossComputePanel = new CrossComputePanel();
 
     // Change focus when user opens different files
     labShell.currentPathChanged.connect((sender, args) => {
-      console.log('labShell.currentPathChanged', sender, args);
+      // console.log('labShell.currentPathChanged', sender, args);
+        panel.updatePath(args['newValue'], '');
     });
 
     // Change path when user go up/down in left filebrowser
     if (defaultFileBrowser) {
       // Promise.all([app.restored, defaultFileBrowser.model.restored]).then(() => {
       defaultFileBrowser.model.pathChanged.connect((sender, args) => {
-        console.log(
-          'defaultFileBrowser pathChanged',
-          defaultFileBrowser.model.path
-        );
-        panel.updatePath(defaultFileBrowser.model.path, '');
+        // console.log(
+        //   'defaultFileBrowser pathChanged',
+        //   defaultFileBrowser.model.path
+        // );
+        panel.updatePath('', defaultFileBrowser.model.path);
       });
       // });
     }
