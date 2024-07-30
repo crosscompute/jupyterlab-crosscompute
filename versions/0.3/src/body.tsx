@@ -34,10 +34,10 @@ export class CrossComputePanel extends ReactWidget {
       <UseSignal signal={this._stateChanged}>
         {(): JSX.Element => (
           <div>
-              <div>Currrent File: {this._curFile}</div>
-              <div>Currrent Dir: {this._curDir}</div>
+            <div>Currrent File: {this._curFile}</div>
+            <div>Currrent Dir: {this._curDir}</div>
           </div>
-      )}
+        )}
       </UseSignal>
     );
   }
@@ -49,8 +49,7 @@ export class CrossComputePanel extends ReactWidget {
     console.log('Updated curFile:', this._curFile);
     console.log('Updated curDir:', this._curDir);
     this._stateChanged.emit();
-    
-    requestAPI<any>('get-example')
+    requestAPI<any>('get-example?path=' + this._curFile)
       .then(data => {
         console.log(data);
       })

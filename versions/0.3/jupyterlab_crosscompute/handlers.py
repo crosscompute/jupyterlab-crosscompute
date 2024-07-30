@@ -1,24 +1,45 @@
 import json
 
+import tornado
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
-import tornado
+
+from crosscompute.exceptions import (
+    CrossComputeConfigurationNotFoundError, CrossComputeError)
+from crosscompute.routines.automation import DiskAutomation
+
 
 class RouteHandler(APIHandler):
-    # The following decorator should be present on all verb methods (head, get, post,
-    # patch, put, delete, options) to ensure only authorized user can request the
-    # Jupyter server
     @tornado.web.authenticated
     def get(self):
+        path = self.get_argument('path')
+        print(path)
+        from pathlib import Path
+        p = Path(path)
+        try:
+            a = DiskAutomation.load(p)
+        except CrossComputeConfigurationNotFoundError as e:
+            d = {'error': str(e)}
+            print(e)
+        except CrossComputeError as e:
+            d = {'error': str(e)}
+            print(e)
+        else:
+            c = a.configuration
+            d = {'name': c.get('name', ''), 'version': c.get('version', '')}
+        '''
         self.finish(json.dumps({
-            "data": "This is /jupyterlab-crosscompute/get-example endpoint!"
+            'path': path.upper(),
         }))
+        '''
+        self.finish(json.dumps(d))
 
 
 def setup_handlers(web_app):
     host_pattern = ".*$"
 
     base_url = web_app.settings["base_url"]
-    route_pattern = url_path_join(base_url, "jupyterlab-crosscompute", "get-example")
+    route_pattern = url_path_join(
+        base_url, "jupyterlab-crosscompute", "get-example")
     handlers = [(route_pattern, RouteHandler)]
     web_app.add_handlers(host_pattern, handlers)
