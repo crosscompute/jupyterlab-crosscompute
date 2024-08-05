@@ -35,8 +35,8 @@ export class CrossComputePanel extends ReactWidget {
     // Update log accordingly
     this._log = 'click stop button';
     this._stateChanged.emit();
-  }
- 
+  };
+
   constructor() {
     super();
     this.id = 'widget-id';
@@ -78,19 +78,32 @@ export class CrossComputePanel extends ReactWidget {
         )}
       </UseSignal>
     );
-  }    
+  }
 
-  updatePath(curFile: string, curDir: string) {
+  // updatePath(curFile: string, curDir: string) {
+  updatePath(currentPath: string) {
+    // TODO: Update front end using cache
+    /*
     this._curFile = curFile;
     this._curDir = curDir;
 
     console.log('Updated curFile:', this._curFile);
     console.log('Updated curDir:', this._curDir);
-    requestAPI<any>('get-example?path=' + this._curFile)
+    */
+    this._config = this._cache[currentPath] || {};
+    this._stateChanged.emit();
+
+    // requestAPI<any>('get-example?path=' + this._curFile)
+    requestAPI<any>('get-example?path=' + currentPath)
       .then(data => {
-        this._config = data;
+        // TODO: Update cache using results from backend
+        // TODO: Only update front end if backend results matches front end focus
+        const { path } = data;
         this._cache[path] = data;
-        this._stateChanged.emit();
+        if (path === currentPath) {
+          this._config = data;
+          this._stateChanged.emit();
+        }
       })
       .catch(reason => {
         console.error(

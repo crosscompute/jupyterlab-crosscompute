@@ -32,6 +32,7 @@ class RouteHandler(APIHandler):
             'path': path.upper(),
         }))
         '''
+        d['path'] = str(path)
         time.sleep(3)
         self.finish(json.dumps(d))
 
