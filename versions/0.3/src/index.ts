@@ -42,6 +42,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // labShell.activeChanged.connect(f);
     // labShell.currentChanged.connect(f);
     // labShell.layoutModified.connect(f);
+    var source = new EventSource('/jupyterlab-crosscompute/log-stream');
+      source.onmessage = function(message) {
+        // console.log(message);
+        panel.updateLog(message.data);
+      };
+
     shell.add(panel, 'right', { rank: 700 });
   }
 };

@@ -112,6 +112,11 @@ export class CrossComputePanel extends ReactWidget {
       });
   }
 
+  updateLog(log: string) {
+      this._log = log;
+      this._stateChanged.emit();
+  }
+
   public get stateChanged(): ISignal<this, void> {
     return this._stateChanged;
   }
