@@ -5,6 +5,14 @@ import React from 'react';
 import { logoIcon } from './constant';
 import { requestAPI } from './handler';
 
+// function debounce(func: any, timeout = 300){
+//   let timer;
+//   return (...args) => {
+//     clearTimeout(timer);
+//     timer = setTimeout(() => { func.apply(this, args); }, timeout);
+//   };
+// }
+
 export class CrossComputePanel extends ReactWidget {
   private _curFile: string;
   private _curDir: string;
@@ -13,6 +21,7 @@ export class CrossComputePanel extends ReactWidget {
   private _stateChanged: Signal<this, void>;
   private _isRunning: boolean;
   private _log: string;
+  private _timer: any;
 
   private _onClickLaunch = () => {
     this._isRunning = true;
@@ -93,8 +102,12 @@ export class CrossComputePanel extends ReactWidget {
     this._config = this._cache[currentPath] || {};
     this._stateChanged.emit();
 
+
+
     // requestAPI<any>('get-example?path=' + this._curFile)
-    requestAPI<any>('get-example?path=' + currentPath)
+      clearTimeout(this._timer);
+      this._timer = setTimeout(() => {
+          requestAPI<any>('get-example?path=' + currentPath)
       .then(data => {
         // TODO: Update cache using results from backend
         // TODO: Only update front end if backend results matches front end focus
@@ -110,6 +123,8 @@ export class CrossComputePanel extends ReactWidget {
           `The jupyterlab_crosscompute server extension appears to be missing.\n${reason}`
         );
       });
+      }, 3000);
+
   }
 
   updateLog(log: string) {
