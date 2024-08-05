@@ -9,6 +9,7 @@ export class CrossComputePanel extends ReactWidget {
   private _curFile: string;
   private _curDir: string;
   private _config: { name: string; version: string };
+  private _cache: any;
   private _stateChanged: Signal<this, void>;
   private _isRunning: boolean;
   private _log: string;
@@ -49,6 +50,7 @@ export class CrossComputePanel extends ReactWidget {
       name: '',
       version: ''
     };
+    this._cache = {};
     this._stateChanged = new Signal<this, void>(this);
     this._isRunning = false;
     this._log = '';
@@ -87,7 +89,7 @@ export class CrossComputePanel extends ReactWidget {
     requestAPI<any>('get-example?path=' + this._curFile)
       .then(data => {
         this._config = data;
-        console.log(data);
+        this._cache[path] = data;
         this._stateChanged.emit();
       })
       .catch(reason => {

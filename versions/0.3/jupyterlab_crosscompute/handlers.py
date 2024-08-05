@@ -1,5 +1,5 @@
 import json
-
+import time
 import tornado
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
@@ -32,6 +32,7 @@ class RouteHandler(APIHandler):
             'path': path.upper(),
         }))
         '''
+        time.sleep(3)
         self.finish(json.dumps(d))
 
 
