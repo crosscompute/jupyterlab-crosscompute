@@ -5,20 +5,37 @@ import React from 'react';
 import { logoIcon } from './constant';
 import { requestAPI } from './handler';
 
-/*
-const TestComponent = (): JSX.Element => {
-    return (
-        <div>
-        <p>Test Component</p>
-        </div>
-    )
-}
-*/
-
 export class CrossComputePanel extends ReactWidget {
-  private _curFile;
-  private _curDir;
-  private _config;
+  private _curFile: string;
+  private _curDir: string;
+  private _config: { name: string; version: string };
+  private _stateChanged: Signal<this, void>;
+  private _isRunning: boolean;
+  private _log: string;
+
+  private _onClickLaunch = () => {
+    this._isRunning = true;
+    // TODO: send launch request to launch endpoint
+
+    // Wait until backend ready
+
+    // Update log accordingly
+    this._log = 'click launch button';
+    this._stateChanged.emit();
+  };
+
+  private _onClickStop = () => {
+    this._isRunning = false;
+
+    // TODO: send stop request to launch endpoint
+
+    // Wait until backend ready
+
+    // Update log accordingly
+    this._log = 'click stop button';
+    this._stateChanged.emit();
+  }
+ 
   constructor() {
     super();
     this.id = 'widget-id';
@@ -32,13 +49,12 @@ export class CrossComputePanel extends ReactWidget {
       name: '',
       version: ''
     };
+    this._stateChanged = new Signal<this, void>(this);
+    this._isRunning = false;
+    this._log = '';
   }
-  render(): JSX.Element {
-    const onClickLaunch = () => {
-      console.log('hey');
-    };
 
-    // return <TestComponent />;
+  render(): JSX.Element {
     return (
       <UseSignal signal={this._stateChanged}>
         {(): JSX.Element => (
@@ -48,12 +64,19 @@ export class CrossComputePanel extends ReactWidget {
             <div>Config:</div>
             <div>Name: {this._config.name}</div>
             <div>Version: {this._config.version}</div>
-            <button onClick={onClickLaunch}>Launch</button>
+            {this._isRunning ? (
+              <button onClick={this._onClickStop}>Stop</button>
+            ) : (
+              <button onClick={this._onClickLaunch}>Launch</button>
+            )}
+
+            <div>Running Log: </div>
+            <div>{this._log}</div>
           </div>
         )}
       </UseSignal>
     );
-  }
+  }    
 
   updatePath(curFile: string, curDir: string) {
     this._curFile = curFile;
@@ -74,9 +97,7 @@ export class CrossComputePanel extends ReactWidget {
       });
   }
 
-  private _stateChanged = new Signal<this, void>(this);
   public get stateChanged(): ISignal<this, void> {
     return this._stateChanged;
   }
 }
-
