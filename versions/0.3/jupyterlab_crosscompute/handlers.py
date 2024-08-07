@@ -35,28 +35,9 @@ class RouteHandler(APIHandler):
         }))
         '''
         d['path'] = str(path)
-        # time.sleep(3)
         self.finish(json.dumps(d))
 
-# TODO: Change from REST to eventstream
-# class LogHandler(APIHandler):
-#     @tornado.web.authenticated
-#     def get(self):
-#         log_type = self.get_argument('type').strip()
-#         relative_folder = self.get_argument('folder').strip('/ ') or '.'
-#         try:
-#             state_by_folder = {
-#                 'launch': LAUNCH_STATE_BY_FOLDER,
-#             }[log_type]
-#             state = state_by_folder[relative_folder]
-#         except KeyError:
-#             self.set_status(404)
-#             d = {}
-#         else:
-#             d = get_log_dictionary(state)
-#         self.finish(json.dumps(d))
-
-def fibonacci():
+def add():
     a = 0
     while True:
         yield a
@@ -112,7 +93,7 @@ def setup_handlers(web_app):
 
     base_url = web_app.settings["base_url"]
 
-    generator = fibonacci()
+    generator = add()
     publisher = DataSource(next(generator))
     def get_next():
         publisher.data = next(generator)

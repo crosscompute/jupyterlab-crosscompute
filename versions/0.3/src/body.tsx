@@ -5,14 +5,6 @@ import React from 'react';
 import { logoIcon } from './constant';
 import { requestAPI } from './handler';
 
-// function debounce(func: any, timeout = 300){
-//   let timer;
-//   return (...args) => {
-//     clearTimeout(timer);
-//     timer = setTimeout(() => { func.apply(this, args); }, timeout);
-//   };
-// }
-
 export class CrossComputePanel extends ReactWidget {
   private _curFile: string;
   private _curDir: string;
@@ -96,19 +88,14 @@ export class CrossComputePanel extends ReactWidget {
     this._curFile = curFile;
     this._curDir = curDir;
 
-    console.log('Updated curFile:', this._curFile);
-    console.log('Updated curDir:', this._curDir);
     */
     this._config = this._cache[currentPath] || {};
     this._stateChanged.emit();
 
-
-
-    // requestAPI<any>('get-example?path=' + this._curFile)
-      clearTimeout(this._timer);
-      this._timer = setTimeout(() => {
-          requestAPI<any>('get-example?path=' + currentPath)
-      .then(data => {
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => {
+        requestAPI<any>('get-example?path=' + currentPath)
+    .then(data => {
         // TODO: Update cache using results from backend
         // TODO: Only update front end if backend results matches front end focus
         const { path } = data;
@@ -117,8 +104,8 @@ export class CrossComputePanel extends ReactWidget {
           this._config = data;
           this._stateChanged.emit();
         }
-      })
-      .catch(reason => {
+    })
+    .catch(reason => {
         console.error(
           `The jupyterlab_crosscompute server extension appears to be missing.\n${reason}`
         );
