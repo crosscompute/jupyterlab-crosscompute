@@ -15,6 +15,9 @@ export class CrossComputePanel extends ReactWidget {
   private _log: string;
   private _timer: any;
 
+  private _openPath: any;
+  private _openFolder: any;
+
   private _onClickLaunch = () => {
     this._isRunning = true;
     // TODO: send launch request to launch endpoint
@@ -38,7 +41,7 @@ export class CrossComputePanel extends ReactWidget {
     this._stateChanged.emit();
   };
 
-  constructor() {
+  constructor(openPath: any, openFolder: any) {
     super();
     this.id = 'widget-id';
     this.addClass('jp-react-widget');
@@ -55,6 +58,9 @@ export class CrossComputePanel extends ReactWidget {
     this._stateChanged = new Signal<this, void>(this);
     this._isRunning = false;
     this._log = '';
+
+    this._openPath = openPath;
+    this._openFolder = openFolder;
   }
 
   render(): JSX.Element {
@@ -75,6 +81,14 @@ export class CrossComputePanel extends ReactWidget {
 
             <div>Running Log: </div>
             <div>{this._log}</div>
+            <a className="crosscompute-Link" onClick={() => this._openPath('jupyterlab-crosscompute/versions/0.3/src/index.ts')}>
+          Test OpenPath
+        </a>
+
+            <a className="crosscompute-Link" onClick={() => this._openFolder('jupyterlab-crosscompute/versions/0.3/src/')}>
+          Test OpenFolder
+        </a>
+
           </div>
         )}
       </UseSignal>

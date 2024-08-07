@@ -1,8 +1,10 @@
 import {
+  ILayoutRestorer,
   ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { CrossComputePanel } from './body';
 
@@ -10,21 +12,34 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
-  requires: [ILabShell, IDefaultFileBrowser],
+  requires: [ILabShell, IDefaultFileBrowser, IDocumentManager],
+  optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     labShell: ILabShell,
-    defaultFileBrowser: IDefaultFileBrowser
+    defaultFileBrowser: IDefaultFileBrowser,
+    docManager: IDocumentManager,
+    restorer?: ILayoutRestorer
   ) => {
     const { shell } = app;
-    const panel: CrossComputePanel = new CrossComputePanel();
 
-    // Change focus when user opens different files
+    console.log('FileBrowser', defaultFileBrowser);
+    const openPath = (path: string) => docManager.openOrReveal(path);
+    const openFolder = (folder: string) => {                                                             
+      labShell.activateById(defaultFileBrowser.id);                                      
+      defaultFileBrowser.model.cd(folder);                                                                           
+    }
+
+    
+    const panel: CrossComputePanel = new CrossComputePanel(openPath, openFolder);
+
+
+    // Change focus when users open different files
     labShell.currentPathChanged.connect((sender, args) => {
       panel.updatePath(args['newValue']);
     });
 
-    // Change path when user go up/down in left filebrowser
+    // Change path when users go up/down in left filebrowser
     if (defaultFileBrowser) {
       defaultFileBrowser.model.pathChanged.connect((sender, args) => {
         panel.updatePath(defaultFileBrowser.model.path);
@@ -37,6 +52,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
       };
 
     shell.add(panel, 'right', { rank: 700 });
+
+    if (restorer) {
+      restorer.add(panel, panel.id);
+    }
+
   }
 };
 
