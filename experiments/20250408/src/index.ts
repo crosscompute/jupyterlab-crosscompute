@@ -1,4 +1,5 @@
 import {
+  ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -17,18 +18,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
-  requires: [IDefaultFileBrowser],
+  requires: [ILabShell, IDefaultFileBrowser],
   optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
+    labShell: ILabShell,
     fileBrowser: IDefaultFileBrowser,
     settingRegistry: ISettingRegistry | null
   ) => {
     const sidebarPanel = new Widget();
     sidebarPanel.id = 'crosscompute-sidebar';
     app.shell.add(sidebarPanel, 'right', { rank: 727 });
-    fileBrowser.model.pathChanged.connect((sender, args) => {
-      console.log('path changed', sender, args);
+    labShell.currentPathChanged.connect((_, args) => {
+      console.log('shell path changed', args.newValue);
+    });
+    fileBrowser.model.pathChanged.connect((_, args) => {
+      console.log('browser path changed', args.newValue);
     });
     // console.log('fileBrowser', fileBrowser);
     // console.log('settingRegistry', settingRegistry);
