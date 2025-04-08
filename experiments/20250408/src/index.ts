@@ -2,6 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { Widget } from '@lumino/widgets';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
@@ -15,17 +16,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
   optional: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settingRegistry: ISettingRegistry | null) => {
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    const sidebarPanel = new Widget();
+    sidebarPanel.id = 'crosscompute-sidebar';
+    app.shell.add(sidebarPanel, 'right', { rank: 727 });
+
     console.log('JupyterLab extension jupyterlab-crosscompute is activated!');
 
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
         .then(settings => {
-          console.log('jupyterlab-crosscompute settings loaded:', settings.composite);
+          console.log(
+            'jupyterlab-crosscompute settings loaded:',
+            settings.composite
+          );
         })
         .catch(reason => {
-          console.error('Failed to load settings for jupyterlab-crosscompute.', reason);
+          console.error(
+            'Failed to load settings for jupyterlab-crosscompute.',
+            reason
+          );
         });
     }
 
