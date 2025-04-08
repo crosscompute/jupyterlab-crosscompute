@@ -8,6 +8,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { requestAPI } from './handler';
 
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+
 /**
  * Initialization data for the jupyterlab-crosscompute extension.
  */
@@ -16,15 +18,21 @@ const plugin: JupyterFrontEndPlugin<void> = {
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
   optional: [ISettingRegistry],
+  requires: [IDefaultFileBrowser],
   activate: (
     app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    fileBrowser: IDefaultFileBrowser
   ) => {
     const sidebarPanel = new Widget();
     sidebarPanel.id = 'crosscompute-sidebar';
     app.shell.add(sidebarPanel, 'right', { rank: 727 });
-
+    // fileBrowser.model.pathChanged.connect((sender, args) => {
+    //   console.log('path changed');
+    // });
+    console.log(fileBrowser);
     console.log('JupyterLab extension jupyterlab-crosscompute is activated!');
+    x = fileBrowser;
 
     if (settingRegistry) {
       settingRegistry
