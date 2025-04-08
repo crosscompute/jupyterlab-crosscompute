@@ -7,3 +7,4 @@
 *_data
 .DS_Store
 .~lock.*
+.idea
