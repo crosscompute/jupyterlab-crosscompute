@@ -17,22 +17,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-crosscompute:plugin',
   description: 'CrossCompute Extensions for JupyterLab',
   autoStart: true,
-  optional: [ISettingRegistry],
   requires: [IDefaultFileBrowser],
+  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry | null,
-    fileBrowser: IDefaultFileBrowser
+    fileBrowser: IDefaultFileBrowser,
+    settingRegistry: ISettingRegistry | null
   ) => {
     const sidebarPanel = new Widget();
     sidebarPanel.id = 'crosscompute-sidebar';
     app.shell.add(sidebarPanel, 'right', { rank: 727 });
-    // fileBrowser.model.pathChanged.connect((sender, args) => {
-    //   console.log('path changed');
-    // });
-    console.log(fileBrowser);
+    fileBrowser.model.pathChanged.connect((sender, args) => {
+      console.log('path changed', sender, args);
+    });
+    // console.log('fileBrowser', fileBrowser);
+    // console.log('settingRegistry', settingRegistry);
     console.log('JupyterLab extension jupyterlab-crosscompute is activated!');
-    x = fileBrowser;
 
     if (settingRegistry) {
       settingRegistry
