@@ -42,7 +42,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
       automationBody.updateModel({ folder: '/' + browserModel.path });
     browserModel.pathChanged.connect(refresh);
     labShell.layoutModified.connect(refresh);
-    registerFocusPathLogger(labShell, docManager, browser);
+    const disposeFocusPathLogger = registerFocusPathLogger(
+      labShell,
+      docManager,
+      browser
+    );
+    automationBody.disposed.connect(disposeFocusPathLogger);
 
     shell.add(automationBody, 'right', { rank: 1000 });
 
@@ -95,7 +100,7 @@ const registerFocusPathLogger = (
   labShell: ILabShell,
   docManager: IDocumentManager,
   browser: IFileBrowserLike
-): void => {
+): (() => void) => {
   let lastLoggedPath = '';
   let lastLoggedAt = 0;
 
@@ -138,11 +143,22 @@ const registerFocusPathLogger = (
     scheduleCurrentDocumentLog();
   };
 
-  labShell.currentPathChanged.connect((_, args) => {
+  const handleCurrentPathChanged = (
+    _: ILabShell,
+    args: ILabShell.ICurrentPathChangedArgs
+  ): void => {
     logPath(normalizePath(args.newValue));
-  });
+  };
+
+  labShell.currentPathChanged.connect(handleCurrentPathChanged);
   document.addEventListener('focusin', handleFocusOrClick, true);
   document.addEventListener('click', handleFocusOrClick, true);
+
+  return (): void => {
+    labShell.currentPathChanged.disconnect(handleCurrentPathChanged);
+    document.removeEventListener('focusin', handleFocusOrClick, true);
+    document.removeEventListener('click', handleFocusOrClick, true);
+  };
 };
 
 export default plugin;
