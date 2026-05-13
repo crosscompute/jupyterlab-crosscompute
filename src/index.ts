@@ -10,6 +10,17 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { AutomationBody } from './body';
 
+const normalizeJupyterPath = (path = ''): string =>
+  '/' + path.replace(/^\/+/, '');
+
+const targetIsInside = (
+  target: EventTarget | null,
+  selector: string
+): boolean => {
+  const element = target instanceof Element ? target : null;
+  return element?.closest(selector) !== null;
+};
+
 /**
  * Initialization data for the jupyterlab-crosscompute extension.
  */
@@ -35,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const openFolder = (folder: string) => {
       labShell.activateById(browser.id);
       browserModel.cd(folder);
-    }
+    };
     const openPath = (path: string) => docManager.openOrReveal(path);
     const automationBody = new AutomationBody(commands, openFolder, openPath);
     const refresh = () =>
@@ -44,6 +55,38 @@ const plugin: JupyterFrontEndPlugin<void> = {
     labShell.layoutModified.connect(refresh);
 
     shell.add(automationBody, 'right', { rank: 1000 });
+
+    let lastLoggedPath: string | null = null;
+    const logPath = (path: string) => {
+      const normalizedPath = normalizeJupyterPath(path);
+      if (normalizedPath === lastLoggedPath) {
+        return;
+      }
+      lastLoggedPath = normalizedPath;
+      console.log(normalizedPath);
+    };
+    const logActiveDocumentPath = () => {
+      const currentWidget = labShell.currentWidget;
+      const context = currentWidget
+        ? docManager.contextForWidget(currentWidget)
+        : null;
+      if (context?.path) {
+        logPath(context.path);
+      }
+    };
+    const logFocusedPath = (event: Event) => {
+      if (targetIsInside(event.target, '.jp-FileBrowser')) {
+        logPath(browserModel.path);
+        return;
+      }
+      window.setTimeout(logActiveDocumentPath, 0);
+    };
+    document.addEventListener('focusin', logFocusedPath, true);
+    document.addEventListener('click', logFocusedPath, true);
+    automationBody.disposed.connect(() => {
+      document.removeEventListener('focusin', logFocusedPath, true);
+      document.removeEventListener('click', logFocusedPath, true);
+    });
 
     /*
     if (settingRegistry) {
