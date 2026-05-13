@@ -72,8 +72,8 @@ interface IFileBrowserLike {
   node: HTMLElement;
 }
 
-const normalizeBrowserFolder = (path: string): string => {
-  return path ? `/${path}` : '/';
+const normalizePath = (path: string): string => {
+  return path ? `/${path.replace(/^\/+/, '')}` : '/';
 };
 
 const getWidgetPath = (
@@ -83,7 +83,8 @@ const getWidgetPath = (
   if (!widget) {
     return null;
   }
-  return docManager.contextForWidget(widget)?.path || null;
+  const path = docManager.contextForWidget(widget)?.path;
+  return path ? normalizePath(path) : null;
 };
 
 const isNode = (target: EventTarget | null): target is Node => {
@@ -112,7 +113,7 @@ const registerFocusPathLogger = (
   };
 
   const logBrowserFolder = (): void => {
-    logPath(normalizeBrowserFolder(browser.model.path));
+    logPath(normalizePath(browser.model.path));
   };
 
   const logCurrentDocument = (): void => {
@@ -138,7 +139,7 @@ const registerFocusPathLogger = (
   };
 
   labShell.currentPathChanged.connect((_, args) => {
-    logPath(args.newValue);
+    logPath(normalizePath(args.newValue));
   });
   document.addEventListener('focusin', handleFocusOrClick, true);
   document.addEventListener('click', handleFocusOrClick, true);
