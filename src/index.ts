@@ -32,16 +32,32 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const { shell, commands } = app;
     const browser = browserFactory.defaultBrowser;
     const browserModel = browser.model;
+    const getBrowserPath = () => `/${browserModel.path}`;
+    const logFocusedPath = (path: string) => {
+      console.log(`jupyterlab-crosscompute focus: ${path}`);
+    };
+    const logCurrentPath = () => {
+      const currentWidget = labShell.currentWidget;
+      if (!currentWidget) {
+        return;
+      }
+      const context = docManager.contextForWidget(currentWidget);
+      logFocusedPath(context?.path ? `/${context.path}` : getBrowserPath());
+    };
     const openFolder = (folder: string) => {
       labShell.activateById(browser.id);
       browserModel.cd(folder);
-    }
+    };
     const openPath = (path: string) => docManager.openOrReveal(path);
     const automationBody = new AutomationBody(commands, openFolder, openPath);
     const refresh = () =>
-      automationBody.updateModel({ folder: '/' + browserModel.path });
+      automationBody.updateModel({ folder: getBrowserPath() });
     browserModel.pathChanged.connect(refresh);
     labShell.layoutModified.connect(refresh);
+    labShell.currentChanged.connect(logCurrentPath);
+    browser.node.addEventListener('click', () => {
+      requestAnimationFrame(() => logFocusedPath(getBrowserPath()));
+    });
 
     shell.add(automationBody, 'right', { rank: 1000 });
 
