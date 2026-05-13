@@ -35,13 +35,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const openFolder = (folder: string) => {
       labShell.activateById(browser.id);
       browserModel.cd(folder);
-    }
+    };
     const openPath = (path: string) => docManager.openOrReveal(path);
     const automationBody = new AutomationBody(commands, openFolder, openPath);
     const refresh = () =>
       automationBody.updateModel({ folder: '/' + browserModel.path });
     browserModel.pathChanged.connect(refresh);
     labShell.layoutModified.connect(refresh);
+    registerFocusPathLogger(labShell, browser);
 
     shell.add(automationBody, 'right', { rank: 1000 });
 
@@ -62,6 +63,69 @@ const plugin: JupyterFrontEndPlugin<void> = {
       restorer.add(automationBody, automationBody.id);
     }
   }
+};
+
+interface IFileBrowserLike {
+  model: {
+    path: string;
+  };
+  node: HTMLElement;
+}
+
+interface IPathContextWidget {
+  context?: {
+    path?: string;
+  };
+}
+
+const getCurrentWidgetPath = (labShell: ILabShell): string | null => {
+  const currentWidget = labShell.currentWidget as IPathContextWidget | null;
+  const path = currentWidget?.context?.path;
+  return path || null;
+};
+
+const isNode = (target: EventTarget | null): target is Node => {
+  return target instanceof Node;
+};
+
+const registerFocusPathLogger = (
+  labShell: ILabShell,
+  browser: IFileBrowserLike
+): void => {
+  let lastLoggedPath = '';
+  let lastLoggedTimestamp = 0;
+  const logPath = (path: string): void => {
+    const now = Date.now();
+    if (path === lastLoggedPath && now - lastLoggedTimestamp < 25) {
+      return;
+    }
+    lastLoggedPath = path;
+    lastLoggedTimestamp = now;
+    console.log(path);
+  };
+  const logBrowserPath = (): void => logPath(browser.model.path || '/');
+  const logCurrentWidgetPath = (): void => {
+    const path = getCurrentWidgetPath(labShell);
+    if (path) {
+      logPath(path);
+    }
+  };
+  const scheduleCurrentWidgetPathLog = (): void => {
+    window.requestAnimationFrame(logCurrentWidgetPath);
+  };
+  const handleFocusPath = (event: Event): void => {
+    if (!isNode(event.target)) {
+      return;
+    }
+    if (browser.node.contains(event.target)) {
+      logBrowserPath();
+      return;
+    }
+    scheduleCurrentWidgetPathLog();
+  };
+
+  document.addEventListener('focusin', handleFocusPath, true);
+  document.addEventListener('click', handleFocusPath, true);
 };
 
 export default plugin;
