@@ -13,6 +13,10 @@ import { AutomationBody } from './body';
 const normalizeJupyterPath = (path = ''): string =>
   '/' + path.replace(/^\/+/, '');
 
+const DOCUMENT_AREA_SELECTOR =
+  '#jp-main-dock-panel, .jp-MainAreaWidget, .jp-DocumentWidget';
+const LOG_DEDUPE_WINDOW_MS = 100;
+
 const targetIsInside = (
   target: EventTarget | null,
   selector: string
@@ -56,13 +60,25 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     shell.add(automationBody, 'right', { rank: 1000 });
 
-    let lastLoggedPath: string | null = null;
+    let lastLoggedPathInBurst: string | null = null;
+    let clearLastLoggedPathTimeout: number | null = null;
+    const clearLastLoggedPathInBurst = () => {
+      lastLoggedPathInBurst = null;
+      clearLastLoggedPathTimeout = null;
+    };
     const logPath = (path: string) => {
       const normalizedPath = normalizeJupyterPath(path);
-      if (normalizedPath === lastLoggedPath) {
+      if (normalizedPath === lastLoggedPathInBurst) {
         return;
       }
-      lastLoggedPath = normalizedPath;
+      lastLoggedPathInBurst = normalizedPath;
+      if (clearLastLoggedPathTimeout !== null) {
+        window.clearTimeout(clearLastLoggedPathTimeout);
+      }
+      clearLastLoggedPathTimeout = window.setTimeout(
+        clearLastLoggedPathInBurst,
+        LOG_DEDUPE_WINDOW_MS
+      );
       console.log(normalizedPath);
     };
     const logActiveDocumentPath = () => {
@@ -79,13 +95,18 @@ const plugin: JupyterFrontEndPlugin<void> = {
         logPath(browserModel.path);
         return;
       }
-      window.setTimeout(logActiveDocumentPath, 0);
+      if (targetIsInside(event.target, DOCUMENT_AREA_SELECTOR)) {
+        window.setTimeout(logActiveDocumentPath, 0);
+      }
     };
     document.addEventListener('focusin', logFocusedPath, true);
     document.addEventListener('click', logFocusedPath, true);
     automationBody.disposed.connect(() => {
       document.removeEventListener('focusin', logFocusedPath, true);
       document.removeEventListener('click', logFocusedPath, true);
+      if (clearLastLoggedPathTimeout !== null) {
+        window.clearTimeout(clearLastLoggedPathTimeout);
+      }
     });
 
     /*
